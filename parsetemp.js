@@ -1,8 +1,6 @@
 var fs = require('fs'),
     readline = require('readline');
 
-var FileReader = require('filereader');
-
 exports.getw1tempafter = function(promise, file) {
     promise.then(function(v) {
         exports.getw1temp(file);
