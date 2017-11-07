@@ -13,10 +13,10 @@ function getw1tempinternal(files, resolve, result) {
     resolve(result);
 }
 
-function readw1(file, then) {
+function readw1(files, resolve, results) {
     var rd = readline.createInterface({
         //input: fs.createReadStream('/sys/bus/w1/devices/28-041780d810ff/w1_slave'),
-        input: fs.createReadStream(file),
+        input: fs.createReadStream(files[0]),
         console: false
     });
 
@@ -39,7 +39,14 @@ function readw1(file, then) {
         }
     });
     rd.on('close', function(line) {
-        then(temp);
+        results.push(temp);
+        if (files.length <= 1) {
+            resolve(results);
+        }
+        else {
+            files.shift();
+            readw1(files, resolve, results);
+        }
     });    
 }
 
@@ -47,18 +54,16 @@ exports.getw1temps = function(files) {
 
     
   var promise = new Promise(function(resolve, reject) {
-      readw1(files[0], function(temp) {
-          getw1tempinternal(files, resolve, [temp]);
-      });
+      readw1(files, resolve, []);
     });
   
     return promise;
 }
 
 //var p = exports.getw1temp("/sys/bus/w1/devices/28-041780d810ff/w1_slave")
-var t1 = exports.getw1temps(["/sys/bus/w1/devices/28-041780d810ff/w1_slave"])
+var t1 = exports.getw1temps(["/sys/bus/w1/devices/28-041780d810ff/w1_slave", "/sys/bus/w1/devices/28-041780d810ff/w1_slave"])
 t1.then(function(v) {
-    console.log("temp: " + v[0]);
+    console.log("temp: " + v);
 })
 
 /*Promise.all([t0, t1]).then(function(v) {
