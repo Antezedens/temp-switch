@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<head>
+<style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+td {
+	font-size: 15pt;
+}
+</style>
+</head>
+<body>
+
+<div ng-app="myApp" ng-controller="myCtrl"> 
+
+
+<!-- <h1>{{relais}}</h1>
+<h1>response {{resp}}</h1>
+<h1>{{sensors}}</h1> -->
+
+<h3>Temperatur</h3>
+<table cellspacing="10">
+<tr ng-repeat="t in sensors.temperatures">
+<td>{{ t.name }}</td>
+<td>{{ t.value }}°C</td>
+</tr>
+</table>
+<h3>Feuchtigkeit</h3>
+<table cellspacing="10">
+<tr ng-repeat="t in sensors.humidity">
+<td>{{ t.name }}</td>
+<td>{{ t.value }}%</td>
+</tr>
+</table>
+
+<div ng-repeat="x in relais">
+<h3>{{ x.name }}</h3>
+<label class="switch">
+  <input type="checkbox" ng-model="x.checked" ng-change="setRelais(x.name, x.checked)">
+  <span class="slider"></span>
+</label>
+
+</div>
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope, $http) {
+  $scope.setRelais = function(name, checked) {
+	$http.post("/relais", { "name": name, "state": checked});
+  }
+  //$http.get("http://private-699939-technikschacht.apiary-mock.com/relais")
+  $http.get("/relais")
+  .then(function(response) {
+	  $scope.resp = response;
+      $scope.relais = response.data;
+	  for (i=0; i < $scope.relais.length; ++i) {
+		$scope.relais[i].checked = ($scope.relais[i].state == 'on')
+	  }	  
+  }, function(err) {
+	$scope.resp = err;
+  });
+  //$http.get("http://private-699939-technikschacht.apiary-mock.com/sensors")
+  $http.get("/sensors")
+  .then(function(response) {
+      $scope.sensors = response.data;
+  });
+});
+</script>
+
+</body>
+</html>
