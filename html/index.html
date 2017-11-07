@@ -64,7 +64,9 @@ td {
 <h1>response {{resp}}</h1>
 <h1>{{sensors}}</h1> -->
 
-<table>
+<table width="100%">
+<col width="20%">
+<col width="80%">
 <tr><td>
 <h3>Temperatur</h3>
 <table cellspacing="10">
@@ -91,7 +93,7 @@ td {
 </div>
 </td>
 <td>
-  <div id="container" style="width:80%; height:400px;"></div>
+  <div id="container" style="height:400px;"></div>
 </td>
 </tr>
 </table>
@@ -117,24 +119,26 @@ app.controller('myCtrl', function($scope, $http) {
   var myChart;
   $http.get("/temperatures")
   .then(function(response) {
-      let t = response.data;
+      let t = response.data.data;
+	let names = response.data.names;
       let series = [];
 
       for (let i=0; i<6; ++i) {
-        series.push({name: "T" + i, data: []});
+        series.push({name: names[i], data: []});
       }
       //{name: "t1", data: []},[],[],[],[]];
   	  for (let i=0; i < t.length; ++i) {
+		ts = t[i][0] * 1000;
         for (let j=0; j<series.length; ++j) {
-            series[j].data.push([t[i][0], t[i][j+1]]);
+            series[j].data.push([ts, t[i][j+1]]);
         }
   	  }
       console.log(series[1]);
 
       myChart = Highcharts.chart('container', {
-              /*chart: {
+              chart: {
                   zoomType: 'x'
-              },*/
+              },
               title: {
                   text: 'Temperaturverlauf'
               },
@@ -180,17 +184,7 @@ app.controller('myCtrl', function($scope, $http) {
                   }*/
               },
 
-              series: series/*[{
-                  type: 'area',
-                  name: 'Temperature',
-                  data: series[0]
-              },
-              {
-                  type: 'area',
-                  name: 'Temperature 2',
-                  data: series[3]
-                  //data: [[100,2],[200,2],[400,4],[500,4],[600,3]]
-              }]*/
+              series: series
             });
 
   }, function(err) {
