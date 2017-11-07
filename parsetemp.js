@@ -3,7 +3,7 @@ var fs = require('fs'),
 
 var FileReader = require('filereader');
 
-exports.getw1tempafter = function(promise, file) {    
+exports.getw1tempafter = function(promise, file) {
     promise.then(function(v) {
         exports.getw1temp(file);
     })
@@ -47,25 +47,15 @@ function readw1(files, resolve, results) {
             files.shift();
             readw1(files, resolve, results);
         }
-    });    
+    });
 }
 
-exports.getw1temps = function(files) {    
+exports.getw1temps = function(files) {
 
-    
+
   var promise = new Promise(function(resolve, reject) {
       readw1(files, resolve, []);
     });
-  
+
     return promise;
 }
-
-//var p = exports.getw1temp("/sys/bus/w1/devices/28-041780d810ff/w1_slave")
-var t1 = exports.getw1temps(["/sys/bus/w1/devices/28-041780d810ff/w1_slave", "/sys/bus/w1/devices/28-041780d810ff/w1_slave"])
-t1.then(function(v) {
-    console.log("temp: " + v);
-})
-
-/*Promise.all([t0, t1]).then(function(v) {
-    console.log("temp: " + v[0] + " " + v[1]);    
-});*/
