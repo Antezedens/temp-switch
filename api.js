@@ -1,6 +1,15 @@
 var util = require('util');
 var exec = require('child_process').exec;
 var setup = require('./setup');
+const sqlite3 = require('sqlite3').verbose();
+let errfct = function($err) {
+        if ($err) {
+                return console.error($err.message);
+        }
+}
+
+let db = new sqlite3.Database('temp.sql', errfct);
+
  
 // GET
 exports.relais = function (req, res) {
@@ -23,16 +32,22 @@ exports.setRelais = function (req, res) {
 };
 
 exports.sensors = function (req, res) {
-	var data;
-	data.temperatures = [];
-	data.humidity = 66;
-	for (let i=0; i<setup.sensors.length; ++i) {
-		var temp;
-		temp.name = setup.sensors[i].name;
-		temp.value = 123;
-		data.temperatures.push(temp)
-	}
-	res.json(data);
+	var data = {};
+	var temps;
+	db.get("SELECT * FROM temp ORDER BY date DESC LIMIT 1", function(err, row) {
+		console.log("last row " + row);
+		data.humidity = row.h0;
+		temps = [row.t0, row.t1, row.t2, row.t3, row.t4, row.t5];
+
+		data.temperatures = [];
+		for (let i=0; i<setup.sensors.length; ++i) {
+			var temp = {};
+			temp.name = setup.sensors[i].name;
+			temp.value = temps[i];
+			data.temperatures.push(temp)
+		}
+		res.json(data);
+	});
 }
  
 function switchStatus(script, command, status){
