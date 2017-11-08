@@ -1,28 +1,33 @@
-exports.w1_prefix="/root/temp-switch/"
+exports.w1_prefix="/sys/bus/w1/devices/"
 
 exports.sensors = [
 {
 	gpio: "xx",
-	name: "Irgendwas"
+	name: "n/a"
 },
 {
-	w1_id: "1",
-	name: "Tisch"
+	w1_id: "28-041780cb13ff",
+	name: "Tisch",
+	color: "blue"
 },
 {
-	w1_id: "2",
-	name: "Sessel"
+	w1_id: "28-041780ced0ff",
+	name: "Sessel",
+	color: "black"
 },	
 {
-	w1_id: "3",
-	name: "Kasten"
+	w1_id: "28-041780d810ff",
+	name: "Kasten",
+	color: "yellow"
 },
 {
-	w1_id: "4",
-	name: "Lade"
+	w1_id: "28-041780d841ff",
+	name: "Lade",
+	color: "white"
 },
 {
-	w1_id: "5",
-	name: "Tür"
+	w1_id: "28-041780d8e9ff",
+	name: "Tür",
+	color: "yellow-green"
 }
 ]
