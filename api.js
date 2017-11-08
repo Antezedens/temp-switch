@@ -1,5 +1,6 @@
-var util = require('util')
+var util = require('util');
 var exec = require('child_process').exec;
+var setup = require('./setup');
  
 // GET
 exports.relais = function (req, res) {
@@ -22,23 +23,15 @@ exports.setRelais = function (req, res) {
 };
 
 exports.sensors = function (req, res) {
-	data = {
-		"temperatures": [
-			{
-				"name": "Schacht",
-				"value": "7.33"
-			}, {
-				"name": "Leitung",
-				"value": "7.55"
-			}
-		],
-		"humidity": [
-			{
-				"name": "Schacht",
-				"value": "66"
-			}
-		]
-	};
+	var data;
+	data.temperatures = [];
+	data.humidity = 66;
+	for (let i=0; i<setup.sensors.length; ++i) {
+		var temp;
+		temp.name = setup.sensors[i].name;
+		temp.value = 123;
+		data.temperatures.push(temp)
+	}
 	res.json(data);
 }
  
