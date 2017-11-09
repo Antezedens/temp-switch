@@ -19,8 +19,8 @@ app.post('/relais', api.setRelais);
 //app.delete('/switches/:id', api.deleteSwitch);
 
 const user = process.env.USER;
-const port = (user == "root") ? 80 : 8000;
+const port = (user == "fuchs") ? 8000 : 80;
 
 // Start server
 app.listen(port);
-console.log("Server running on port " + port);
+console.log("Server running on port " + port + " [" + user + "]");
