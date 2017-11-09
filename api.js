@@ -71,34 +71,29 @@ exports.temperatures = function (req, res) {
   const inp = fs.createReadStream('/tmp/test.txt');
   /*const out = fs.createWriteStream('/tmp/test.gz');
   inp.pipe(gzip).pipe(out);*/
-  let buffer = zlib.gzipSync("[[2, 100], [3,120], [4, 110]]");
   //console.log()
 
   res.set('Content-Encoding', 'gzip');
   //res.set('Content-type', 'application/x-gzip');
   //let buffer = fs.readFileSync('/tmp/test.gz', 'binary')
-  res.write(buffer, 'binary');
 
-  res.status(200).end(null, 'binary');
-
-  
-	/*var data = {};
-	var temps;
-  var zip = new require('node-zip');
+	var data = [];
 	db.each("SELECT date, t0, t1, t2, t3, t4, t5 FROM temp ORDER BY date", function(err, row) {
-		temps = [row.t0, row.t1, row.t2, row.t3, row.t4, row.t5];
-
-		data.temperatures = [];
+    data.push([row.date, row.t0, row.t1, row.t2, row.t3, row.t4, row.t5]);
+		/*data.temperatures = [];
 		for (let i=0; i<setup.sensors.length; ++i) {
 			var temp = {};
 			temp.name = setup.sensors[i].name;
 			temp.value = temps[i];
 			data.temperatures.push(temp)
-		}
-		res.json(data);
+		}*/
 	}, function(err) {
+    let buffer = zlib.gzipSync(JSON.stringify(data));
+    res.write(buffer, 'binary');
 
-  });*/
+    res.status(200).end(null, 'binary');
+
+  });
 }
 
 function switchStatus(script, command, status){
