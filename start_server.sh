@@ -1,3 +1,3 @@
 #!/bin/sh
-cd ${0%%logtemp.sh}
+cd ${0%/*}
 node server.js
