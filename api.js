@@ -1,8 +1,10 @@
 var util = require('util');
 var exec = require('child_process').exec;
 var setup = require('./setup');
-var jf = require('jsonfile')
+var jf = require('jsonfile');
+var checkrelaisstate = require('./checkrelaisstate.js');
 const sqlite3 = require('sqlite3').verbose();
+const relaisFile = './relais.json';
 let errfct = function($err) {
         if ($err) {
                 return console.error($err.message);
@@ -15,7 +17,7 @@ let db = new sqlite3.Database('temp.sql', errfct);
 // GET
 exports.relais = function (req, res) {
   console.log('Getting switches.');
-  jf.readFile('./relais.json', function(err, obj) {
+  jf.readFile(relaisFile, function(err, obj) {
     res.status(200).json(obj);
   });
 
@@ -26,6 +28,20 @@ exports.setRelais = function (req, res) {
   var name = req.body.name;
   var state = req.body.state;
   console.log("Name: " + name + " : " + state);
+
+  relais = jf.readFileSync(relaisFile);
+  for (let i=0; i<relais.length; ++i) {
+    if (relais[i].name == name) {
+      relais[i].on = state;
+    }
+  }
+  jf.writeFile(relaisFile, relais, {spaces: 2, EOL: '\n'}, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        checkrelaisstate.update(relais);
+      }
+  });
   res.status(200).send();
 };
 

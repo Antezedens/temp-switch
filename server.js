@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 /*app.configure(function(){
   app.use(express.bodyParser());
 });*/
- 
+
 // JSON API
 app.use(express.static('html'));
 app.get('/relais', api.relais);
