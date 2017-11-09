@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.src.js"></script>
 <head>
 <style>
 .switch {
@@ -63,6 +64,8 @@ td {
 <h1>response {{resp}}</h1>
 <h1>{{sensors}}</h1> -->
 
+<table>
+<tr><td>
 <h3>Temperatur</h3>
 <table cellspacing="10">
 <tr ng-repeat="t in sensors.temperatures">
@@ -86,6 +89,12 @@ td {
 </label>
 
 </div>
+</td>
+<td>
+  <div id="container" style="width:80%; height:400px;"></div>
+</td>
+</tr>
+</table>
 
 <script>
 var app = angular.module('myApp', []);
@@ -102,14 +111,87 @@ app.controller('myCtrl', function($scope, $http) {
   	  	$scope.relais[i].checked = $scope.relais[i].on
   	  }
   }, function(err) {
-	$scope.resp = err;
+	   $scope.resp = err;
   });
+
+  $http.get("/temperatures")
+  .then(function(response) {
+	  /*$scope.resp = response;
+      $scope.relais = response.data;
+  	  for (i=0; i < $scope.relais.length; ++i) {
+  	  	$scope.relais[i].checked = $scope.relais[i].on
+  	  }*/
+      console.log(response.data);
+  }, function(err) {
+	   console.log(err);
+  });
+
   //$http.get("http://private-699939-technikschacht.apiary-mock.com/sensors")
   $http.get("/sensors")
   .then(function(response) {
       $scope.sensors = response.data;
   });
 });
+var myChart = Highcharts.chart('container', {
+        /*chart: {
+            zoomType: 'x'
+        },*/
+        title: {
+            text: 'Temperaturverlauf'
+        },
+        subtitle: {
+            //text: document.ontouchstart === undefined ?
+            //        'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
+        },
+        xAxis: {
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: 'Temperature'
+            }
+        },
+        legend: {
+            enabled: true
+        },
+        plotOptions: {
+            /*area: {
+                /*fillColor: {
+                    linearGradient: {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 1
+                    },
+                    stops: [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                    ]
+                },
+                marker: {
+                    radius: 2
+                },
+                lineWidth: 1,
+                states: {
+                    hover: {
+                        lineWidth: 1
+                    }
+                },
+                threshold: null
+            }*/
+        },
+
+        series: [{
+            /*type: 'area',*/
+            name: 'Temperature',
+            data: [[100,1],[200,2],[400,3],[500,4],[600,5]]
+        },
+        {
+            /*type: 'area',*/
+            name: 'Temperature 2',
+            data: [[100,2],[200,2],[400,4],[500,4],[600,3]]
+        }]
+      });
 </script>
 
 </body>
