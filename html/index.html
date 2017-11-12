@@ -159,6 +159,7 @@ app.controller('myCtrl', function($scope, $http) {
         }
   	  }
 
+      Highcharts.setOptions({global: { useUTC: false }});
       myChart = Highcharts.chart('container', {
               chart: {
                   zoomType: 'x'
