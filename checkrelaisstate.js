@@ -1,6 +1,11 @@
 var fs = require('fs');
-var sqlite = require('sqlite3');
+var sqlite3 = require('sqlite3').verbose();
 const gpioBasePath = "/sys/class/gpio/"
+let errfct = function($err) {
+        if ($err) {
+                return console.error($err.message);
+        }
+}
 
 function gpioState(pin, state) {
   let valuePath = gpioBasePath + "gpio" + pin + "/value";
@@ -17,8 +22,10 @@ function gpioState(pin, state) {
   if (fs.readFileSync(valuePath).toString() != value) {
     console.log("updated value of " + pin);
     fs.writeFileSync(valuePath, value);
-	let db = new sqlite3.Database('temp.sql', errfct);
-	db.run('INSERT INTO relais (gpio, state) VALUES (pin, ' + state ? 1:0 + ');');	
+	let db = new sqlite3.Database('relais.sql', errfct);
+	let query = 'INSERT INTO relais (gpio, state) VALUES (' + pin + ', ' + (state ? 1:0) + ')';	
+	db.run(query, errfct);
+	db.close();
   }
 }
 

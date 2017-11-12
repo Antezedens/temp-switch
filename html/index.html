@@ -116,7 +116,7 @@ app.controller('myCtrl', function($scope, $http) {
   $scope.toggle = function(name) {
     if ($scope.selected_temp == name) {
       $scope.selected_temp = null;
-      myChart.update({series: series}, true, true);
+      myChart.update({series: series.slice(0,6)}, true, true);
     } else {
       $scope.selected_temp = name;
       for (let i=0; i<series.length; ++i) {
@@ -143,12 +143,16 @@ app.controller('myCtrl', function($scope, $http) {
 	   $scope.resp = err;
   });
 
+  $http.get("/relaisHistory")
+  .then(function(response) {
+	console.log(response.data);
+});
   $http.get("/temperatures")
   .then(function(response) {
       let t = response.data.data;
 	     let names = response.data.names;
 
-      for (let i=0; i<6; ++i) {
+      for (let i=0; i<names.length; ++i) {
         series.push({name: names[i], data: []});
       }
       //{name: "t1", data: []},[],[],[],[]];
@@ -157,7 +161,7 @@ app.controller('myCtrl', function($scope, $http) {
         for (let j=0; j<series.length; ++j) {
             series[j].data.push([ts, t[i][j+1]]);
         }
-  	  }
+  	 }
 
       Highcharts.setOptions({global: { useUTC: false }});
       myChart = Highcharts.chart('container', {
@@ -210,7 +214,7 @@ app.controller('myCtrl', function($scope, $http) {
 
               },
 
-              series: series
+              series: series.slice(0,6)
             });
   }, function(err) {
 	   console.log(err);

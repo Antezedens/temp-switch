@@ -1,5 +1,6 @@
 var parsetemp = require('./parsetemp');
 var setup = require('./setup');
+var fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 let errfct = function($err) {
 	if ($err) {
@@ -23,6 +24,10 @@ console.log(w1_sensors);
 
 parsetemp.getw1temps(w1_sensors).then(function(v) {
 	console.log("t: " + v);
-	db.run('INSERT INTO temp (h0, t0, t1, t2, t3, t4, t5) VALUES (null, null, ' + v +')', errfct);
+	cput = parseInt(fs.readFileSync('/sys/devices/virtual/thermal/thermal_zone0/temp'));
+	//console.log("cpu: " + cput);
+	db.run('INSERT INTO temp (h0, t0, t1, t2, t3, t4, t5, cput) VALUES (null, null, ' + v +',' + cput + ')', errfct);
+	//console.log('INSERT INTO temp (h0, t0, t1, t2, t3, t4, t5, cput) VALUES (null, null, ' + v +',' + cput + ')');
 	db.close();
 });
+// /sys/devices/virtual/thermal/thermal_zone0/temp

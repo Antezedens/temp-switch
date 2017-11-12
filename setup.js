@@ -29,5 +29,8 @@ exports.sensors = [
 	w1_id: "28-041780d8e9ff",
 	name: "Tür",
 	color: "yellow-green"
+},
+{
+	name: "CPU"
 }
 ]

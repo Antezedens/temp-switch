@@ -12,6 +12,7 @@ app.use(bodyParser.json());
 // JSON API
 app.use(express.static('html'));
 app.get('/relais', api.relais);
+app.get('/relaisHistory', api.relaisHistory);
 app.get('/sensors', api.sensors);
 app.get('/temperatures', api.temperatures);
 app.post('/relais', api.setRelais);
