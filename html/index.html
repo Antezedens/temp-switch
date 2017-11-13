@@ -51,6 +51,10 @@ input:focus + .slider {
   color: gray;
   font-style: italic;
 }
+.colgreen {
+  color: darkgreen;
+  font-style: italic;
+}
 input:checked + .slider:before {
   -webkit-transform: translateX(26px);
   -ms-transform: translateX(26px);
@@ -74,29 +78,31 @@ td {
 <col width="20%">
 <col width="80%">
 <tr><td>
-<h3>Temperatur</h3>
+<h3>Sensoren</h3>
 <table cellspacing="10">
 <tr ng-repeat="t in sensors.temperatures" ng-click="toggle(t.name)" ng-class="selected_temp == null || selected_temp == t.name ? 'colblack' : 'colgrey'">
 <td>{{ t.name }}</td>
 <td>{{ t.value }}°C</td>
 </tr>
-</table>
-<h3>Feuchtigkeit</h3>
-<table cellspacing="10">
 <tr>
-<td></td>
+<td>Feuchtigkeit</td>
 <td>{{ sensors.humidity }}%</td>
 </tr>
 </table>
 
-<div ng-repeat="x in relais">
-<h3>{{ x.name }}</h3>
-<label class="switch">
+<h3>Schalter</h3>
+<table cellspacing="10">
+<tr ng-repeat="x in relais" ng-click="toggleRelais(x)" ng-class="x.shown ? 'colgreen' : 'colblack'">
+<td>{{ x.name }}</td>
+<td>
+  <label class="switch">
   <input type="checkbox" ng-model="x.checked" ng-change="setRelais(x.name, x.checked)">
   <span class="slider"></span>
 </label>
+</td>
+</tr>
+</table>
 
-</div>
 </td>
 <td>
   <div id="container" style="height:400px;"></div>
@@ -108,7 +114,36 @@ td {
 var series = [];
 var myChart;
 var app = angular.module('myApp', []);
+
 app.controller('myCtrl', function($scope, $http) {
+  function updateSeries() {
+    var seriesNew = [];
+    if ($scope.selected_temp != null) {
+      for (let i=0; i<series.length; ++i) {
+        if (series[i].name == $scope.selected_temp) {
+          seriesNew.push({
+             name: series[i].name,
+             data: series[i].data,
+             type: 'area'
+          });
+        }
+      }
+    }
+    else {
+      for (let i=0; i<6; ++i) {
+        seriesNew.push(series[i]);
+      }
+    }
+    for (x in $scope.relais) {
+      if ($scope.relais[x].shown) {
+        seriesNew.push({
+          name: $scope.relais[x].name,
+          data: $scope.relaisHistory[$scope.relais[x].gpio]
+        });
+      }
+    }
+    myChart.update({series: seriesNew}, true, true);
+  }
   $scope.selected_temp = null;
   $scope.setRelais = function(name, checked) {
 	$http.post("/relais", { "name": name, "state": checked});
@@ -116,20 +151,14 @@ app.controller('myCtrl', function($scope, $http) {
   $scope.toggle = function(name) {
     if ($scope.selected_temp == name) {
       $scope.selected_temp = null;
-      myChart.update({series: series.slice(0,6)}, true, true);
     } else {
       $scope.selected_temp = name;
-      for (let i=0; i<series.length; ++i) {
-        if (series[i].name == name) {
-          let seriesNew = {
-             name: series[i].name,
-             data: series[i].data,
-             type: 'area'
-          };
-          myChart.update({series: seriesNew}, true, true);
-        }
-      }
     }
+    updateSeries();
+  }
+  $scope.toggleRelais = function(x) {
+    x.shown = !x.shown;
+    updateSeries();
   }
   //$http.get("http://private-699939-technikschacht.apiary-mock.com/relais")
   $http.get("/relais")
@@ -143,10 +172,6 @@ app.controller('myCtrl', function($scope, $http) {
 	   $scope.resp = err;
   });
 
-  $http.get("/relaisHistory")
-  .then(function(response) {
-	console.log(response.data);
-});
   $http.get("/temperatures")
   .then(function(response) {
       let t = response.data.data;
@@ -155,13 +180,31 @@ app.controller('myCtrl', function($scope, $http) {
       for (let i=0; i<names.length; ++i) {
         series.push({name: names[i], data: []});
       }
+      var ts;
       //{name: "t1", data: []},[],[],[],[]];
   	  for (let i=0; i < t.length; ++i) {
-		ts = t[i][0] * 1000;
+		      ts = t[i][0] * 1000;
         for (let j=0; j<series.length; ++j) {
             series[j].data.push([ts, t[i][j+1]]);
         }
   	 }
+
+     $http.get("/relaisHistory")
+     .then(function(response) {
+       for (gpio in response.data.data) {
+         let gp = response.data.data[gpio];
+         let gpNew = [];
+         console.log(gp);
+         for (let i=0; i<gp.length; ++i) {
+           gpNew.push([(gp[i][0]-1)*1000, gp[i][1]^1]);
+           gpNew.push([gp[i][0]*1000, gp[i][1]]);
+         }
+         gpNew.push([ts, gp[gp.length-1][1]]);
+         response.data.data[gpio] = gpNew;
+       }
+       $scope.relaisHistory = response.data.data;
+       console.log($scope.relaisHistory);
+   });
 
       Highcharts.setOptions({global: { useUTC: false }});
       myChart = Highcharts.chart('container', {
