@@ -138,6 +138,7 @@ app.controller('myCtrl', function($scope, $http) {
       if ($scope.relais[x].shown) {
         seriesNew.push({
           name: $scope.relais[x].name,
+          yAxis: 1,
           data: $scope.relaisHistory[$scope.relais[x].gpio]
         });
       }
@@ -221,11 +222,21 @@ app.controller('myCtrl', function($scope, $http) {
               xAxis: {
                   type: 'datetime'
               },
-              yAxis: {
+              yAxis: [{
+                  labels: {
+                     format: '{value}°C'
+                  },
                   title: {
                       text: 'Temperature'
-                  }
-              },
+                  },
+              }, {
+                ceiling: 1,
+                opposite: true,
+                title: {
+                    text: 'State'
+                }
+              }
+              ],
               legend: {
                   enabled: true
               },
