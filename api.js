@@ -1,12 +1,10 @@
 var util = require('util');
 var exec = require('child_process').exec;
 var setup = require('./setup');
-var jf = require('jsonfile');
 const fs = require('fs');
 var checkrelaisstate = require('./checkrelaisstate.js');
 const zlib = require('zlib');
 const sqlite3 = require('sqlite3').verbose();
-const relaisFile = './relais.json';
 let errfct = function($err) {
         if ($err) {
                 return console.error($err.message);
@@ -20,10 +18,7 @@ let db2 = new sqlite3.Database('relais.sql', errfct);
 // GET
 exports.relais = function (req, res) {
   console.log('Getting switches.');
-  jf.readFile(relaisFile, function(err, obj) {
-    res.status(200).json(obj);
-  });
-
+  res.status(200).json(checkrelaisstate.readRelais());
 };
 
 // PUT
@@ -32,7 +27,7 @@ exports.setRelais = function (req, res) {
   var name = body.name;
   console.log("Name: " + name + " : " + body);
 
-  relais = jf.readFileSync(relaisFile);
+  relais = checkrelaisstate.readRelais();
   for (let i=0; i<relais.length; ++i) {
     if (relais[i].name == name) {
       if ('state' in body) {
@@ -43,13 +38,7 @@ exports.setRelais = function (req, res) {
       }
     }
   }
-  jf.writeFile(relaisFile, relais, {spaces: 2, EOL: '\n'}, function(err) {
-      if (err) {
-        console.log(err);
-      } else {
-        checkrelaisstate.update(relais);
-      }
-  });
+  checkrelaisstate.writeRelais(relais);
   res.status(200).send();
 };
 
@@ -103,12 +92,11 @@ exports.relaisHistory = function (req, res) {
 	res.set('Content-Encoding', 'gzip');
 	var data = {};
 
-  	relais = jf.readFileSync(relaisFile);
+  	relais = checkrelaisstate.readRelais();
   	for (let i=0; i<relais.length; ++i) {
 	    	data[relais[i].gpio] = [];
   	}
 	db2.each("SELECT  strftime('%s', date) as ts, gpio, state FROM relais ORDER BY date", function(err, row) {
-		console.log("row " + row);
 		data[row.gpio].push([row.ts, row.state]);
 
 	}, function(err) {

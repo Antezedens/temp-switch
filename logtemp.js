@@ -31,8 +31,5 @@ parsetemp.getw1temps(w1_sensors).then(function(v) {
 	db.close();
 });
 
-const relaisFile = './relais.json';
-var jf = require('jsonfile');
-let relais = jf.readFileSync(relaisFile);
-require('./checkrelaisstate.js').update(relais);
+require('./checkrelaisstate.js').check();
 // /sys/devices/virtual/thermal/thermal_zone0/temp

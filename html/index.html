@@ -252,7 +252,9 @@ app.controller('myCtrl', function($scope, $http) {
          let gpNew = [];
          console.log(gp);
          for (let i=0; i<gp.length; ++i) {
-           gpNew.push([(gp[i][0]-1)*1000, gp[i][1]^1]);
+           if (i>0 && gp[i][1] != gp[i-1][1]) {
+             gpNew.push([(gp[i][0]-1)*1000, gp[i-1][1]]);
+           }
            gpNew.push([gp[i][0]*1000, gp[i][1]]);
          }
          gpNew.push([ts, gp[gp.length-1][1]]);

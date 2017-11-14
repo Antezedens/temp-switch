@@ -1,3 +1,5 @@
+const relaisFile = './relais.json';
+var jf = require('jsonfile');
 var fs = require('fs');
 var sqlite3 = require('sqlite3').verbose();
 const gpioBasePath = "/sys/class/gpio/"
@@ -37,8 +39,36 @@ function gpioState(pin, state) {
   }
 }
 
-exports.update = function(relais) {
+function update(relais) {
+  console.log("update: " + relais);
   for (let i=0; i<relais.length; ++i) {
-    gpioState(relais[i].gpio, relais[i].on);
+    let switching = relais[i].switching;
+    console.log("switching " + switching);
+    if (switching != "" && new Date(switching) < new Date()) {
+      console.log("time to switch! " + relais[i].gpio);
+      relais[i].on = false;
+      relais[i].switching = "";
+      exports.writeRelais(relais);
+    }
+
+    gpioState(relais[i].gpio, relais[i].on, relais[i].switching);
   }
+}
+
+exports.readRelais = function() {
+  return jf.readFileSync(relaisFile);
+}
+
+exports.writeRelais = function(relais) {
+  jf.writeFile(relaisFile, relais, {spaces: 2, EOL: '\n'}, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        update(relais);
+      }
+  });
+}
+
+exports.check = function() {
+  update(exports.readRelais());
 }
