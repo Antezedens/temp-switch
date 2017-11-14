@@ -30,4 +30,9 @@ parsetemp.getw1temps(w1_sensors).then(function(v) {
 	//console.log('INSERT INTO temp (h0, t0, t1, t2, t3, t4, t5, cput) VALUES (null, null, ' + v +',' + cput + ')');
 	db.close();
 });
+
+const relaisFile = './relais.json';
+var jf = require('jsonfile');
+let relais = jf.readFileSync(relaisFile);
+require('./checkrelaisstate.js').update(relais);
 // /sys/devices/virtual/thermal/thermal_zone0/temp

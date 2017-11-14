@@ -210,7 +210,7 @@ app.controller('myCtrl', function($scope, $http) {
   $scope.setRelais24 = function(name) {
     var tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-	  $http.post("/relais", { "name": name, "switching": tomorrow}).then (function(response) {
+	  $http.post("/relais", { "name": name, "state": true, "switching": tomorrow}).then (function(response) {
       $scope.updateRelais();
     });
   }

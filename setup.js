@@ -1,4 +1,9 @@
-exports.w1_prefix="/sys/bus/w1/devices/"
+const user = process.env.USER;
+if (user == "fuchs") {
+	exports.w1_prefix="./"
+} else {
+	exports.w1_prefix="/sys/bus/w1/devices/";
+}
 
 exports.sensors = [
 {
@@ -14,7 +19,7 @@ exports.sensors = [
 	w1_id: "28-041780ced0ff",
 	name: "Sessel",
 	color: "black"
-},	
+},
 {
 	w1_id: "28-041780d810ff",
 	name: "Kasten",
