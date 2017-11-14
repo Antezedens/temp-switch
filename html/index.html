@@ -2,13 +2,14 @@
 <html>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 <script src="https://code.highcharts.com/highcharts.src.js"></script>
+<script src="http://stevenlevithan.com/assets/misc/date.format.js"></script>
 <head>
 <style>
 .switch {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  width: 50px;
+  height: 28px;
 }
 
 .switch input {display:none;}
@@ -28,13 +29,40 @@
 .slider:before {
   position: absolute;
   content: "";
-  height: 26px;
-  width: 26px;
+  height: 20px;
+  width: 20px;
   left: 4px;
   bottom: 4px;
   background-color: white;
   -webkit-transition: .4s;
   transition: .4s;
+}
+
+.button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    height: 24px;
+    /*padding: 8px 16px;*/
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    /*margin: 4px 2px;*/
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    cursor: pointer;
+}
+
+.button1 {
+    background-color: white;
+    color: #ccc;
+    border: 2px solid #ccc;
+}
+.button1:hover {
+    background-color: #4CAF50;
+    border: 2px solid #4CAF50;
+    color: white;
 }
 
 input:checked + .slider {
@@ -56,9 +84,9 @@ input:focus + .slider {
   font-style: italic;
 }
 input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+  -webkit-transform: translateX(20px);
+  -ms-transform: translateX(20px);
+  transform: translateX(20px);
 }
 td {
 	font-size: 15pt;
@@ -99,6 +127,13 @@ td {
   <input type="checkbox" ng-model="x.checked" ng-change="setRelais(x.name, x.checked)">
   <span class="slider"></span>
 </label>
+</td>
+<!--<td width = '40px' ng-mouseover="open = true" ng-mouseleave="open = false"> -->
+<td>
+ <button class="button button1" type="button" ng-show="x.switching == ''" ng-click="setRelais24(x.name)"  >
+        24h
+ </button>
+ {{ x.switchingTime }}
 </td>
 </tr>
 </table>
@@ -145,9 +180,39 @@ app.controller('myCtrl', function($scope, $http) {
     }
     myChart.update({series: seriesNew}, true, true);
   }
+
+  $scope.updateRelais = function() {
+    $http.get("/relais")
+    .then(function(response) {
+  	  $scope.resp = response;
+        $scope.relais = response.data;
+    	  for (i=0; i < $scope.relais.length; ++i) {
+    	  	$scope.relais[i].checked = $scope.relais[i].on
+          if ($scope.relais[i].switching != "") {
+            let d = new Date($scope.relais[i].switching);
+            //let d = $scope.relais[i].switching;
+            $scope.relais[i].switchingTime = d.format('dd.mm. HH:MM');
+          }
+    	  }
+    }, function(err) {
+  	   $scope.resp = err;
+    });
+  };
+
+  $scope.updateRelais();
+
   $scope.selected_temp = null;
   $scope.setRelais = function(name, checked) {
-	$http.post("/relais", { "name": name, "state": checked});
+	$http.post("/relais", { "name": name, "state": checked, "switching": ""}).then (function(response) {
+    $scope.updateRelais();
+  });
+  };
+  $scope.setRelais24 = function(name) {
+    var tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+	  $http.post("/relais", { "name": name, "switching": tomorrow}).then (function(response) {
+      $scope.updateRelais();
+    });
   }
   $scope.toggle = function(name) {
     if ($scope.selected_temp == name) {
@@ -162,16 +227,6 @@ app.controller('myCtrl', function($scope, $http) {
     updateSeries();
   }
   //$http.get("http://private-699939-technikschacht.apiary-mock.com/relais")
-  $http.get("/relais")
-  .then(function(response) {
-	  $scope.resp = response;
-      $scope.relais = response.data;
-  	  for (i=0; i < $scope.relais.length; ++i) {
-  	  	$scope.relais[i].checked = $scope.relais[i].on
-  	  }
-  }, function(err) {
-	   $scope.resp = err;
-  });
 
   $http.get("/temperatures")
   .then(function(response) {

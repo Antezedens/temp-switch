@@ -28,14 +28,19 @@ exports.relais = function (req, res) {
 
 // PUT
 exports.setRelais = function (req, res) {
-  var name = req.body.name;
-  var state = req.body.state;
-  console.log("Name: " + name + " : " + state);
+  var body = req.body;
+  var name = body.name;
+  console.log("Name: " + name + " : " + body);
 
   relais = jf.readFileSync(relaisFile);
   for (let i=0; i<relais.length; ++i) {
     if (relais[i].name == name) {
-      relais[i].on = state;
+      if ('state' in body) {
+        relais[i].on = body.state;
+      }
+      if ('switching' in body) {
+        relais[i].switching = body.switching;
+      }
     }
   }
   jf.writeFile(relaisFile, relais, {spaces: 2, EOL: '\n'}, function(err) {
@@ -104,13 +109,13 @@ exports.relaisHistory = function (req, res) {
   	}
 	db2.each("SELECT  strftime('%s', date) as ts, gpio, state FROM relais ORDER BY date", function(err, row) {
 		console.log("row " + row);
-		data[row.gpio].push([row.ts, row.state]);	
+		data[row.gpio].push([row.ts, row.state]);
 
 	}, function(err) {
 		let buffer = zlib.gzipSync(JSON.stringify({data: data}));
 		res.write(buffer, 'binary');
-		res.status(200).end(null, 'binary'); 
-	});	
+		res.status(200).end(null, 'binary');
+	});
 
 }
 
