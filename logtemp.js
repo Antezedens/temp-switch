@@ -31,5 +31,5 @@ parsetemp.getw1temps(w1_sensors).then(function(v) {
 	db.close();
 });
 
-require('./checkrelaisstate.js').check();
+require('./checkrelaisstate').check();
 // /sys/devices/virtual/thermal/thermal_zone0/temp

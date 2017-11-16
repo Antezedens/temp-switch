@@ -19,6 +19,8 @@ app.post('/relais', api.setRelais);
 //app.put('/switches/:id', api.editSwitch);
 //app.delete('/switches/:id', api.deleteSwitch);
 
+require('./checkrelaisstate').check();
+
 const user = process.env.USER;
 const port = (user == "fuchs") ? 8000 : 80;
 
