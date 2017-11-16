@@ -32,6 +32,15 @@ exports.setRelais = function (req, res) {
     if (relais[i].name == name) {
       if ('state' in body) {
         relais[i].on = body.state;
+	if (body.state && 'excludes' in relais[i]) {
+	  let excludes = relais[i].excludes;
+	  for (let j=0; j<relais.length; ++j) {
+	    if (relais[j].name == excludes || relais[j].gpio == excludes) {
+              relais[j].on = false;
+              relais[j].switching = "";
+            }
+	  }
+	}
       }
       if ('switching' in body) {
         relais[i].switching = body.switching;
