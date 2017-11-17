@@ -1,20 +1,52 @@
 [
   {
-    "name": "Fan",
+    "name": "r1",
     "on": true,
     "switching": "",
     "gpio": 198
   },
   {
-    "name": "FilterOn",
+    "name": "r2",
     "on": false,
     "switching": "",
-    "gpio": 199
+    "gpio": 199,
+    "excludes": 7
   },
   {
-    "name": "FilterOff",
-    "on": false,
+    "name": "r3",
+    "on": true,
     "switching": "",
-    "gpio": 7
+    "gpio": 7,
+    "excludes": 199
+  },
+  {
+    "name": "r4",
+    "on": true,
+    "switching": "",
+    "gpio": 19
+  },
+  {
+    "name": "r5",
+    "on": true,
+    "switching": "",
+    "gpio": 14
+  },
+  {
+    "name": "r6",
+    "on": true,
+    "switching": "",
+    "gpio": 16
+  },
+  {
+    "name": "r7",
+    "on": true,
+    "switching": "",
+    "gpio": 15
+  },
+  {
+    "name": "r8",
+    "on": true,
+    "switching": "",
+    "gpio": 3
   }
 ]
