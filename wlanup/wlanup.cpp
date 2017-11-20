@@ -61,9 +61,9 @@ int main() {
   }
 
   if (not checkaddressOk(sock)) {
-    if (system("iwgetid wlan0 | grep tigernetz")) {
+    if (system("/sbin/iwgetid wlan0 | /bin/grep tigernetz")) {
       printf("bring interface up...\n");
-      system("ifup wlan0");
+      system("/sbin/ifup wlan0");
       checkaddressOk(sock);
     }
   }
