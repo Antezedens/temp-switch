@@ -45,7 +45,7 @@ int checkaddressOk(int sock) {
     printf("addr: %s - ok\n", str);
     if (not readState()) {
       printf("restart python\n");
-      system("killall python2.7");
+      system("/usr/bin/killall python2.7");
       writeState(1);
     }
     return 1;
@@ -54,9 +54,9 @@ int checkaddressOk(int sock) {
 }
 
 int bringupIfDown() {
-  if (system("iwgetid wlan0 | grep tigernetz")) {
+  if (system("/sbin/iwgetid wlan0 | /bin/grep tigernetz")) {
     printf("bring interface up...\n");
-    system("ifup wlan0");
+    system("/sbin/ifup wlan0");
     return 1;
   }
   return 0;
