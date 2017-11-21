@@ -53,17 +53,28 @@ int checkaddressOk(int sock) {
 
 }
 
+int bringupIfDown() {
+  if (system("iwgetid wlan0 | grep tigernetz")) {
+    printf("bring interface up...\n");
+    system("ifup wlan0");
+    return 1;
+  }
+  return 0;
+}
+
 int main() {
   int sock = socket(AF_INET, SOCK_DGRAM, 0);
   if (not sock) {
     perror("could not open socket\n");
     return -1;
   }
-
-  if (not checkaddressOk(sock)) {
-    if (system("iwgetid wlan0 | grep tigernetz")) {
-      printf("bring interface up...\n");
-      system("ifup wlan0");
+  if (checkaddressOk(sock)) {
+    return 0;
+  }
+  if (bringupIfDown()) {
+    if (not checkaddressOk(sock)) {
+      sleep(5 * 60);
+      bringupIfDown();
       checkaddressOk(sock);
     }
   }
