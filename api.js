@@ -80,16 +80,21 @@ exports.temperatures = function (req, res) {
   res.set('Content-Encoding', 'gzip');
   //res.set('Content-type', 'application/x-gzip');
   //let buffer = fs.readFileSync('/tmp/test.gz', 'binary')
-		var names = [];
+		var names = "[";
 		for (let i=0; i<setup.sensors.length; ++i) {
-			names.push(setup.sensors[i].name);
+      if (i!=0) {
+        names += ',';
+      }
+			names += setup.sensors[i].name;
 		}
+    names += ']';
 
 	var data = [];
 	db.each("SELECT strftime('%s', date) as ts, t0, t1, t2, t3, t4, t5, cput FROM temp ORDER BY date", function(err, row) {
     data.push([row.ts, row.t0, row.t1, row.t2, row.t3, row.t4, row.t5, row.cput]);
 	}, function(err) {
     let buffer = zlib.gzipSync(JSON.stringify({names: names, data: data}));
+    res.set('Content-Length', buffer.length);
     res.write(buffer, 'binary');
 
     res.status(200).end(null, 'binary');
