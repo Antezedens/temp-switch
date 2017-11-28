@@ -141,6 +141,7 @@ td {
 </td>
 <td>
   <div id="container" style="height:400px;"></div>
+  <h6>Size {{ datasize }} </h6>
 </td>
 </tr>
 </table>
@@ -230,6 +231,7 @@ app.controller('myCtrl', function($scope, $http) {
 
   $http.get("/temperatures")
   .then(function(response) {
+    $scope.datasize = response.headers('Content-Length');
       let t = response.data.data;
 	     let names = response.data.names;
 

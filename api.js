@@ -69,6 +69,10 @@ exports.sensors = function (req, res) {
 	});
 }
 
+function f(s) {
+  return " round(t" + s + ", 2) as t" + s + ",";
+}
+
 exports.temperatures = function (req, res) {
   /*fs.writeFileSync("/tmp/test.txt", "[[2, 100], [3,120], [4, 110]]");
   const gzip = zlib.createGzip();
@@ -86,10 +90,11 @@ exports.temperatures = function (req, res) {
 		}
 
 	var data = [];
-	db.each("SELECT strftime('%s', date) as ts, t0, t1, t2, t3, t4, t5, cput FROM temp ORDER BY date", function(err, row) {
+	db.each("SELECT strftime('%s', date) as ts," + f(0) + f(1) + f(2) + f(3) + f(4) + f(5) + " cput FROM temp ORDER BY date", function(err, row) {
     data.push([row.ts, row.t0, row.t1, row.t2, row.t3, row.t4, row.t5, row.cput]);
 	}, function(err) {
     let buffer = zlib.gzipSync(JSON.stringify({names: names, data: data}));
+    res.set('Content-Length', buffer.length);
     res.write(buffer, 'binary');
 
     res.status(200).end(null, 'binary');
