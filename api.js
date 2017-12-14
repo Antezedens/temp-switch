@@ -131,6 +131,8 @@ exports.temperatures = function(req, res) {
                 lasttss = ts;
                 transition[i] = null;
             }
+        } else {
+            transition[i] = null;
         }
     }
 
