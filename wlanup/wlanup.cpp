@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#define IFACE "wlan1"
 void writeState(int state) {
   int stateFd = open("/tmp/wlan_state", O_WRONLY | O_CREAT, 0666);
   if (not stateFd) {
@@ -31,7 +32,7 @@ int readState() {
 
 int checkaddressOk(int sock) {
   struct ifreq ethreq;
-  strncpy(ethreq.ifr_name, "wlan0", IFNAMSIZ);
+  strncpy(ethreq.ifr_name, IFACE, IFNAMSIZ);
   ioctl(sock, SIOCGIFINDEX, &ethreq);
   if (ioctl(sock, SIOCGIFADDR, &ethreq) != 0) {
     perror("no address!\n");
@@ -54,9 +55,9 @@ int checkaddressOk(int sock) {
 }
 
 int bringupIfDown() {
-  if (system("/sbin/iwgetid wlan0 | /bin/grep tigernetz")) {
+  if (system("/sbin/iwgetid " IFACE " | /bin/grep tigernetz")) {
     printf("bring interface up...\n");
-    system("/sbin/ifup wlan0");
+    system("/sbin/ifup " IFACE);
     return 1;
   }
   return 0;
