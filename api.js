@@ -187,3 +187,14 @@ function switchStatus(script, command, status) {
     console.log("Executing: " + execString);
     exec(execString, puts);
 }
+
+exports.temp_sql_bz2 = function(req, res) {
+  var stream = require('child_process').spawn('bzip2', ['-c', 'temp.sql']).stdout
+  stream.on('data', (data) => {
+    res.write(data);
+  });
+  stream.on('close', (code) => {
+    res.status(200).end(null, 'binary');
+  });
+
+}

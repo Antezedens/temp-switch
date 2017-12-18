@@ -16,6 +16,7 @@ app.get('/relaisHistory', api.relaisHistory);
 app.get('/sensors', api.sensors);
 app.get('/temperatures', api.temperatures);
 app.post('/relais', api.setRelais);
+app.get('/temp.sql.bz2', api.temp_sql_bz2);
 //app.put('/switches/:id', api.editSwitch);
 //app.delete('/switches/:id', api.deleteSwitch);
 
