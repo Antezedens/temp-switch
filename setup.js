@@ -12,27 +12,27 @@ exports.sensors = [
 },
 {
 	w1_id: "28-041780cb13ff",
-	name: "Tisch",
+	name: "Wasserleitung",
 	color: "blue"
 },
 {
 	w1_id: "28-041780ced0ff",
-	name: "Sessel",
+	name: "Erde",
 	color: "black"
 },
 {
 	w1_id: "28-041780d810ff",
-	name: "Kasten",
+	name: "Außentemp",
 	color: "yellow"
 },
 {
 	w1_id: "28-041780d841ff",
-	name: "Lade",
+	name: "Gehäuse",
 	color: "white"
 },
 {
 	w1_id: "28-041780d8e9ff",
-	name: "Tür",
+	name: "Schacht Luft",
 	color: "yellow-green"
 },
 {
