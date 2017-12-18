@@ -148,7 +148,9 @@ app.controller('myCtrl', function($scope, $http) {
                                     value: t[i][j][1]
                                 });
                             }
-                            var read = store.openCursor();
+                            //var myIDBKeyRange = IDBKeyRange.lowerBound(1512086400 * 1000.0); // 1.12.2017
+                            var myIDBKeyRange = IDBKeyRange.lowerBound(1513454400 * 1000.0); // 16.12.2017
+                            var read = store.openCursor(myIDBKeyRange);
                             read.onsuccess = function(event) {
                                 var cursor = event.target.result;
                                 if (cursor) {
