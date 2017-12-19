@@ -231,11 +231,11 @@ exports.restart = function(req, res) {
     });
     stream.on('close', (code) => {
         res.write("</pre><h3>restart</h3><pre>")
-        var stream = require('child_process').spawn('systemctl', ['restart', 'web']).stdout
-        stream.on('data', (data) => {
+        var stream2 = require('child_process').spawn('systemctl', ['restart', 'web']).stdout
+        stream2.on('data', (data) => {
             res.write(data);
         });
-        stream.on('close', (code) => {
+        stream2.on('close', (code) => {
 
             res.write("</pre></body></html>");
             res.status(200).end(null);
