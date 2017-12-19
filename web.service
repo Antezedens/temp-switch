@@ -1,0 +1,9 @@
+[Unit]
+Description=Website
+
+[Service]
+ExecStart=/usr/bin/node server.js
+WorkingDirectory=/root/temp-switch/
+
+[Install]
+WantedBy=multi-user.target
