@@ -189,12 +189,56 @@ function switchStatus(script, command, status) {
 }
 
 exports.temp_sql_bz2 = function(req, res) {
-  var stream = require('child_process').spawn('bzip2', ['-c', 'temp.sql']).stdout
-  stream.on('data', (data) => {
-    res.write(data);
-  });
-  stream.on('close', (code) => {
-    res.status(200).end(null, 'binary');
-  });
+    var stream = require('child_process').spawn('bzip2', ['-c', 'temp.sql']).stdout
+    stream.on('data', (data) => {
+        res.write(data);
+    });
+    stream.on('close', (code) => {
+        res.status(200).end(null, 'binary');
+    });
 
+}
+
+exports.pull = function(req, res) {
+    res.write("<html><body><h3>git pull</h3><pre>");
+    var stream = require('child_process').spawn('git', ['pull']).stdout
+    stream.on('data', (data) => {
+        res.write(data);
+    });
+    stream.on('close', (code) => {
+        res.write("</pre></body></html>");
+        res.status(200).end(null);
+    });
+}
+
+exports.status = function(req, res) {
+    res.write("<html><body><h3>status</h3><pre>");
+    var stream = require('child_process').spawn('systemctl', ['status', 'web']).stdout
+    stream.on('data', (data) => {
+        res.write(data);
+    });
+    stream.on('close', (code) => {
+        res.write("</pre></body></html>");
+        res.status(200).end(null);
+    });
+}
+
+exports.restart = function(req, res) {
+    res.write("<html><body><h3>git pull</h3><pre>");
+    var stream = require('child_process').spawn('git', ['pull']).stdout
+    stream.on('data', (data) => {
+        res.write(data);
+    });
+    stream.on('close', (code) => {
+        res.write("</pre><h3>restart</h3><pre>")
+        var stream = require('child_process').spawn('systemctl', ['restart', 'web']).stdout
+        stream.on('data', (data) => {
+            res.write(data);
+        });
+        stream.on('close', (code) => {
+
+            res.write("</pre></body></html>");
+            res.status(200).end(null);
+        });
+    });
 }
