@@ -136,6 +136,8 @@ app.controller('myCtrl', function($scope, $http) {
                     let names = response.data.names;
                     var promises = [];
                     var verylastts = response.data.lastts * 1000;
+                    var veryfirstts = 1513454400 * 1000.0; // 16.12.2017
+                    // var veryfirstts = 1512086400 * 1000.0; // 1.12.2017
 
                     for (let i = 0; i < names.length; ++i) {
                         promises.push(new Promise(function(fulfill, reject) {
@@ -148,13 +150,15 @@ app.controller('myCtrl', function($scope, $http) {
                                     value: t[i][j][1]
                                 });
                             }
-                            //var myIDBKeyRange = IDBKeyRange.lowerBound(1512086400 * 1000.0); // 1.12.2017
-                            var myIDBKeyRange = IDBKeyRange.lowerBound(1513454400 * 1000.0); // 16.12.2017
+                            var myIDBKeyRange = IDBKeyRange.lowerBound(veryfirstts);
                             var read = store.openCursor(myIDBKeyRange);
                             read.onsuccess = function(event) {
                                 var cursor = event.target.result;
                                 if (cursor) {
                                     let entry = [cursor.value.date, cursor.value.value];
+                                    if (serdata.length == 0) {
+                                        serdata.push([veryfirstts, cursor.value.value]);
+                                    }
                                     serdata.push(entry);
                                     cursor.continue();
                                 } else {
@@ -170,6 +174,18 @@ app.controller('myCtrl', function($scope, $http) {
                     $http.get("/relaisHistory")
                         .then(function(response) {
                             Promise.all(promises).then(values => {
+                                var perday = 24 * 3600 * 1000;
+                                var firstband = Math.ceil((veryfirstts + 1000) / perday) * perday;
+                                for (let day = firstband; day < verylastts; day += perday * 2) {
+                                    let newday = day + (new Date(day).getTimezoneOffset()) * 60 * 1000;
+                                    myChart.xAxis[0].addPlotBand({
+                                        from: newday,
+                                        to: newday + perday,
+                                        color: 'rgba(220, 220, 220, .2)',
+                                        id: day
+                                    })
+                                }
+
                                 for (let i = 0; i < values.length; ++i) {
                                     series.push({
                                         name: names[i],
