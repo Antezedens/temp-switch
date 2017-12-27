@@ -100,14 +100,15 @@ exports.temperatures = function(req, res) {
     var lasttss = [0, 0, 0, 0, 0, 0];
     var transition = [];
 
-    function addpoint(ts, i, value, lasttss) {
+    function addpoint(ts, i, value, lasttss, delta) {
         if (ts < fromts[i]) {
             return;
         }
 
         if (lastvalues[i] != value) {
             var doit = true;
-            if (Math.abs(lastvalues[i] - value) < 0.15) {
+
+            if (Math.abs(lastvalues[i] - value) < delta) {
                 if (transition[i] === null) {
                     transition[i] = ts;
                     doit = false;
@@ -138,13 +139,13 @@ exports.temperatures = function(req, res) {
 
     db.each("SELECT strftime('%s', date) as ts," + f(0) + f(1) + f(2) + f(3) + f(4) + f(5) + " cput FROM temp ORDER BY date", function(err, row) {
         let ts = row.ts;
-        addpoint(ts, 0, row.t0, lasttss);
-        addpoint(ts, 1, row.t1, lasttss);
-        addpoint(ts, 2, row.t2, lasttss);
-        addpoint(ts, 3, row.t3, lasttss);
-        addpoint(ts, 4, row.t4, lasttss);
-        addpoint(ts, 5, row.t5, lasttss);
-        addpoint(ts, 6, row.cput, lasttss);
+        addpoint(ts, 0, row.t0, lasttss, 0.15);
+        addpoint(ts, 1, row.t1, lasttss, 0.15);
+        addpoint(ts, 2, row.t2, lasttss, 0.15);
+        addpoint(ts, 3, row.t3, lasttss, 0.15);
+        addpoint(ts, 4, row.t4, lasttss, 0.15);
+        addpoint(ts, 5, row.t5, lasttss, 0.15);
+        addpoint(ts, 6, row.cput, lasttss, 1.5);
         lastts = ts;
         //data.push([row.ts, row.t0, row.t1, row.t2, row.t3, row.t4, row.t5, row.cput]);
     }, function(err) {
