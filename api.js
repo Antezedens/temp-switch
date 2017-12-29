@@ -113,7 +113,7 @@ exports.temperatures = function(req, res) {
                     transition[i] = ts;
                     doit = false;
                 } else {
-                    if (ts - transition[i] > 17 * 60) { // some minutes
+                    if (ts - transition[i] > 17) { // some minutes
                         data[i].push([transition[i], lastvalues[i]]);
                         lasttss[i] = lastts;
                         doit = true;
@@ -138,7 +138,7 @@ exports.temperatures = function(req, res) {
     }
 
     db.each("SELECT strftime('%s', date) as ts," + f(0) + f(1) + f(2) + f(3) + f(4) + f(5) + " cput FROM temp ORDER BY date", function(err, row) {
-        let ts = row.ts;
+        let ts = Math.floor(row.ts / 60);
         addpoint(ts, 0, row.t0, lasttss, 0.15);
         addpoint(ts, 1, row.t1, lasttss, 0.15);
         addpoint(ts, 2, row.t2, lasttss, 0.15);

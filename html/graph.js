@@ -95,17 +95,19 @@ app.controller('myCtrl', function($scope, $http) {
         });
 
     //indexedDB.deleteDatabase('sensors');
-    var request = indexedDB.open('sensors', 1);
+    var request = indexedDB.open('sensors', 3);
     request.onupgradeneeded = function() {
         var db = this.result;
         for (let i = 0; i < 10; ++i) {
-            if (!db.objectStoreNames.contains('data' + i)) {
-                db.createObjectStore('data' + i, {
-                    keyPath: "date"
-                })
+            let objName = 'data' + i;
+            if (db.objectStoreNames.contains(objName)) {
+                db.deleteObjectStore(objName);
             }
+            db.createObjectStore(objName, {
+                keyPath: "date"
+            });
         }
-    };
+    }
     request.onsuccess = function() {
         var db = this.result;
         var fetchts = [];
@@ -117,7 +119,7 @@ app.controller('myCtrl', function($scope, $http) {
                     var cur = event.target.result;
                     if (cur) {
                         console.log(cur.key);
-                        fulfill(cur.key / 1000);
+                        fulfill(cur.key / (1000 * 60));
                     } else {
                         fulfill(0);
                     }
@@ -135,18 +137,25 @@ app.controller('myCtrl', function($scope, $http) {
                     let t = response.data.data;
                     let names = response.data.names;
                     var promises = [];
-                    var verylastts = response.data.lastts * 1000;
+                    var verylastts = response.data.lastts * 1000 * 60;
                     var veryfirstts = 1513454400 * 1000.0; // 16.12.2017
+                    let perday = 24 * 3600 * 1000;
                     // var veryfirstts = 1512086400 * 1000.0; // 1.12.2017
+                    veryfirstts = Math.ceil(veryfirstts / perday) * perday;
 
                     for (let i = 0; i < names.length; ++i) {
+
                         promises.push(new Promise(function(fulfill, reject) {
                             var serdata = [];
+                            var avgTemps = [];
+                            var lastentry = [];
+                            var lastday;
                             var trans = db.transaction(['data' + i], 'readwrite');
                             var store = trans.objectStore('data' + i);
+                            var avg = 0;
                             for (let j = 0; j < t[i].length; ++j) {
                                 store.put({
-                                    date: t[i][j][0] * 1000,
+                                    date: t[i][j][0] * (1000 * 60),
                                     value: t[i][j][1]
                                 });
                             }
@@ -155,18 +164,44 @@ app.controller('myCtrl', function($scope, $http) {
                             read.onsuccess = function(event) {
                                 var cursor = event.target.result;
                                 if (cursor) {
-                                    let entry = [cursor.value.date, cursor.value.value];
                                     if (serdata.length == 0) {
-                                        serdata.push([veryfirstts, cursor.value.value]);
+                                        lastentry = [veryfirstts, cursor.value.value];
+                                        lastday = Math.floor(veryfirstts / perday);
+                                        serdata.push(lastentry);
                                     }
+                                    let entry = [cursor.value.date, cursor.value.value];
+                                    let currentday = Math.floor(veryfirstts / perday);
+
+                                    if (currentday > lastday) {
+                                        let midnight = (lastday + 1) * perday;
+                                        let timeTillMidnight = midnight - lastentry[0];
+                                        let middle = (entry[1] + lastentry[1]) / 2;
+
+                                        avg += timeTillMidnight * middle;
+                                        avgTemps.push(avg / perday);
+
+                                        lastday += 1;
+                                        while (lastday < currentday) {
+                                            avgTemps.push(middle);
+                                            lastday += 1;
+                                        }
+
+                                        let timeAfterMidnight = entry[0] - (currentday) * perday;
+                                        avg = timeAfterMidnight * middle;
+                                    } else {
+                                        avg += (entry[0] - lastentry[0]) * (entry[1] + lastentry[1]) / 2;
+                                    }
+
+                                    lastentry = entry;
+                                    lastday = currentday;
+
                                     serdata.push(entry);
                                     cursor.continue();
                                 } else {
                                     if (serdata.length > 0) {
-                                        var lastentry = serdata[serdata.length - 1];
                                         serdata.push([verylastts, lastentry[1]]);
                                     }
-                                    fulfill(serdata);
+                                    fulfill([serdata, avgTemps]);
                                 }
                             }
                         }));
@@ -174,7 +209,6 @@ app.controller('myCtrl', function($scope, $http) {
                     $http.get("/relaisHistory")
                         .then(function(response) {
                             Promise.all(promises).then(values => {
-                                var perday = 24 * 3600 * 1000;
                                 var firstband = Math.ceil((veryfirstts + 1000) / perday) * perday;
                                 for (let day = firstband; day < verylastts; day += perday * 2) {
                                     let newday = day + (new Date(day).getTimezoneOffset()) * 60 * 1000;
@@ -189,7 +223,7 @@ app.controller('myCtrl', function($scope, $http) {
                                 for (let i = 0; i < values.length; ++i) {
                                     series.push({
                                         name: names[i],
-                                        data: values[i]
+                                        data: values[i][0]
                                     });
                                 }
                                 for (gpio in response.data.data) {
