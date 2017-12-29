@@ -24,9 +24,6 @@ app.controller('myCtrl', function($scope, $http) {
     }
 
     function updateSeries() {
-        let legendItemClick = event => {
-            return toggleVisible(i);
-        };
         var seriesNew = [];
         var avgSeriesNew = [];
         if ($scope.selected_temp != null) {
@@ -52,7 +49,9 @@ app.controller('myCtrl', function($scope, $http) {
                     data: series[i].data,
                     visible: visible[i],
                     events: {
-                        legendItemClick: legendItemClick
+                        legendItemClick: function(event) {
+                            return toggleVisible(i);
+                        }
                     }
                 });
                 avgSeriesNew.push({
@@ -60,7 +59,9 @@ app.controller('myCtrl', function($scope, $http) {
                     data: makediff(series[i].avg),
                     visible: visible[i],
                     events: {
-                        legendItemClick: legendItemClick
+                        legendItemClick: function(event) {
+                            return toggleVisible(i);
+                        }
                     }
                 });
             }
