@@ -1,23 +1,68 @@
 var series = [];
 var myChart;
+var avgChart;
 var app = angular.module('myApp', []);
+var visible = [false, true, true, false, false, true];
 
 app.controller('myCtrl', function($scope, $http) {
+    function makediff(avgdata) {
+        if ($scope.showAbs) {
+            return avgdata;
+        } else {
+            var result = [0];
+            for (let i = 1; i < avgdata.length; ++i) {
+                result.push(Math.round((avgdata[i] - avgdata[i - 1]) * 100) / 100);
+            }
+            return result;
+        }
+    }
+
+    function toggleVisible(i) {
+        visible[i] = !visible[i];
+        updateSeries();
+        return false;
+    }
+
     function updateSeries() {
+        let legendItemClick = event => {
+            return toggleVisible(i);
+        };
         var seriesNew = [];
+        var avgSeriesNew = [];
         if ($scope.selected_temp != null) {
             for (let i = 0; i < series.length; ++i) {
                 if (series[i].name == $scope.selected_temp) {
                     seriesNew.push({
                         name: series[i].name,
                         data: series[i].data,
-                        type: 'area'
+                        type: 'area',
+                        visible: true
+                    });
+                    avgSeriesNew.push({
+                        name: series[i].name,
+                        data: makediff(series[i].avg),
+                        visible: true
                     });
                 }
             }
         } else {
             for (let i = 0; i < 6; ++i) {
-                seriesNew.push(series[i]);
+                seriesNew.push({
+                    name: series[i].name,
+                    data: series[i].data,
+                    visible: visible[i],
+                    events: {
+                        legendItemClick: legendItemClick
+                    }
+                });
+                avgSeriesNew.push({
+                    name: series[i].name,
+                    data: makediff(series[i].avg),
+                    visible: visible[i],
+                    events: {
+                        legendItemClick: legendItemClick
+                    }
+                });
             }
         }
         for (x in $scope.relais) {
@@ -32,6 +77,9 @@ app.controller('myCtrl', function($scope, $http) {
         myChart.update({
             series: seriesNew
         }, true, true);
+        avgChart.update({
+            series: avgSeriesNew
+        }, true, true)
     }
 
     $scope.updateRelais = function() {
@@ -83,6 +131,10 @@ app.controller('myCtrl', function($scope, $http) {
         }
         updateSeries();
     }
+    $scope.toggleAbsDiff = function() {
+        $scope.showAbs = !$scope.showAbs;
+        updateSeries();
+    }
     $scope.toggleRelais = function(x) {
         x.shown = !x.shown;
         updateSeries();
@@ -118,7 +170,6 @@ app.controller('myCtrl', function($scope, $http) {
                 readStore.openCursor(null, 'prev').onsuccess = function(event) {
                     var cur = event.target.result;
                     if (cur) {
-                        console.log(cur.key);
                         fulfill(cur.key / (1000 * 60));
                     } else {
                         fulfill(0);
@@ -170,7 +221,7 @@ app.controller('myCtrl', function($scope, $http) {
                                         serdata.push(lastentry);
                                     }
                                     let entry = [cursor.value.date, cursor.value.value];
-                                    let currentday = Math.floor(veryfirstts / perday);
+                                    let currentday = Math.floor(cursor.value.date / perday);
 
                                     if (currentday > lastday) {
                                         let midnight = (lastday + 1) * perday;
@@ -178,11 +229,11 @@ app.controller('myCtrl', function($scope, $http) {
                                         let middle = (entry[1] + lastentry[1]) / 2;
 
                                         avg += timeTillMidnight * middle;
-                                        avgTemps.push(avg / perday);
+                                        avgTemps.push(Math.round(avg / perday * 100) / 100);
 
                                         lastday += 1;
                                         while (lastday < currentday) {
-                                            avgTemps.push(middle);
+                                            avgTemps.push(Math.round(middle * 100) / 100);
                                             lastday += 1;
                                         }
 
@@ -209,27 +260,25 @@ app.controller('myCtrl', function($scope, $http) {
                     $http.get("/relaisHistory")
                         .then(function(response) {
                             Promise.all(promises).then(values => {
-                                var firstband = Math.ceil((veryfirstts + 1000) / perday) * perday;
-                                for (let day = firstband; day < verylastts; day += perday * 2) {
-                                    let newday = day + (new Date(day).getTimezoneOffset()) * 60 * 1000;
-                                    myChart.xAxis[0].addPlotBand({
-                                        from: newday,
-                                        to: newday + perday,
-                                        color: 'rgba(220, 220, 220, .2)',
-                                        id: day
-                                    })
+                                var categories = [];
+                                let firstday = Math.floor(veryfirstts / perday) * perday;
+                                let lastday = Math.floor(verylastts / perday) * perday;
+                                for (let day = firstday; day < verylastts; day += perday * 1) {
+                                    let newday = new Date(day);
+                                    categories.push(newday.format('dd.mm.yy'));
                                 }
+
 
                                 for (let i = 0; i < values.length; ++i) {
                                     series.push({
                                         name: names[i],
-                                        data: values[i][0]
+                                        data: values[i][0],
+                                        avg: values[i][1]
                                     });
                                 }
                                 for (gpio in response.data.data) {
                                     let gp = response.data.data[gpio];
                                     let gpNew = [];
-                                    console.log(gp);
                                     for (let i = 0; i < gp.length; ++i) {
                                         if (i > 0 && gp[i][1] != gp[i - 1][1]) {
                                             gpNew.push([(gp[i][0] - 1) * 1000, gp[i - 1][1]]);
@@ -240,7 +289,19 @@ app.controller('myCtrl', function($scope, $http) {
                                     response.data.data[gpio] = gpNew;
                                 }
                                 $scope.relaisHistory = response.data.data;
-                                console.log($scope.relaisHistory);
+                                createCharts(categories);
+
+                                let firstband = Math.ceil((veryfirstts + 1000) / perday) * perday;
+                                for (let day = firstband; day < verylastts; day += perday * 2) {
+                                    let newday = day + (new Date(day).getTimezoneOffset()) * 60 * 1000;
+                                    myChart.xAxis[0].addPlotBand({
+                                        from: newday,
+                                        to: newday + perday,
+                                        color: 'rgba(220, 220, 220, .2)',
+                                        id: day
+                                    })
+                                }
+
                                 updateSeries();
                             })
                         });
@@ -251,73 +312,100 @@ app.controller('myCtrl', function($scope, $http) {
         });
     };
 
+    function createCharts(categories) {
 
-    Highcharts.setOptions({
-        global: {
-            useUTC: false
-        }
-    });
-    myChart = Highcharts.chart('container', {
-        chart: {
-            zoomType: 'x'
-        },
-        title: {
-            text: 'Temperaturverlauf'
-        },
-        subtitle: {
-            //text: document.ontouchstart === undefined ?
-            //        'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
-        },
-        xAxis: {
-            type: 'datetime'
-        },
-        yAxis: [{
-            labels: {
-                format: '{value}°C'
-            },
-            title: {
-                text: 'Temperature'
-            },
-        }, {
-            ceiling: 1,
-            opposite: true,
-            title: {
-                text: 'State'
+        Highcharts.setOptions({
+            global: {
+                useUTC: false
             }
-        }],
-        legend: {
-            enabled: true
-        },
-        plotOptions: {
-            area: {
-                fillColor: {
-                    linearGradient: {
-                        x1: 0,
-                        y1: 0,
-                        x2: 0,
-                        y2: 1
+        });
+        myChart = Highcharts.chart('container', {
+            chart: {
+                zoomType: 'x'
+            },
+            title: {
+                text: 'Temperaturverlauf'
+            },
+            subtitle: {
+                //text: document.ontouchstart === undefined ?
+                //        'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
+            },
+            xAxis: {
+                type: 'datetime'
+            },
+            yAxis: [{
+                labels: {
+                    format: '{value}°C'
+                },
+                title: {
+                    text: 'Temperature'
+                },
+            }, {
+                ceiling: 1,
+                opposite: true,
+                title: {
+                    text: 'State'
+                }
+            }],
+            legend: {
+                enabled: true
+            },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                        linearGradient: {
+                            x1: 0,
+                            y1: 0,
+                            x2: 0,
+                            y2: 1
+                        },
+                        stops: [
+                            [0, Highcharts.getOptions().colors[0]],
+                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                        ]
                     },
-                    stops: [
-                        [0, Highcharts.getOptions().colors[0]],
-                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-                    ]
-                },
-                marker: {
-                    radius: 2
-                },
-                lineWidth: 1,
-                states: {
-                    hover: {
-                        lineWidth: 1
-                    }
-                },
-                threshold: null
+                    marker: {
+                        radius: 2
+                    },
+                    lineWidth: 1,
+                    states: {
+                        hover: {
+                            lineWidth: 1
+                        }
+                    },
+                    threshold: null
+                }
+
             }
+        });
 
-        },
+        avgChart = Highcharts.chart('avgcontainer', {
+            chart: {
+                zoomType: 'x',
+                type: 'column',
+                events: {
+                    click: $scope.toggleAbsDiff
+                }
+            },
+            title: {
+                text: '<a href="#" onclick="toggleAbsDiff();return false;">Temperature</a>'
+            },
+            xAxis: {
+                categories: categories
+            },
+            yAxis: {
+                labels: {
+                    format: '{value}°C'
+                },
+                title: {
+                    text: 'Temperature'
+                },
+            },
+            legend: {
+                enabled: true
+            }
+        });
 
-        series: series.slice(0, 6)
-    });
-
+    }
     //$http.get("http://private-699939-technikschacht.apiary-mock.com/sensors")
 });
