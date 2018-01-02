@@ -9,7 +9,7 @@ app.controller('myCtrl', function($scope, $http) {
         if ($scope.showAbs) {
             return avgdata;
         } else {
-            var result = [0];
+            var result = [];
             for (let i = 1; i < avgdata.length; ++i) {
                 result.push(Math.round((avgdata[i] - avgdata[i - 1]) * 100) / 100);
             }
@@ -213,6 +213,32 @@ app.controller('myCtrl', function($scope, $http) {
                             }
                             var myIDBKeyRange = IDBKeyRange.lowerBound(veryfirstts);
                             var read = store.openCursor(myIDBKeyRange);
+
+                            function processEntry(entry) {
+                                let currentday = Math.floor(entry[0] / perday);
+
+                                if (currentday > lastday) {
+                                    let midnight = (lastday + 1) * perday;
+                                    let timeTillMidnight = midnight - lastentry[0];
+                                    let middle = (entry[1] + lastentry[1]) / 2;
+
+                                    avg += timeTillMidnight * middle;
+                                    avgTemps.push(Math.round(avg / perday * 100) / 100);
+
+                                    lastday += 1;
+                                    while (lastday < currentday) {
+                                        avgTemps.push(Math.round(middle * 100) / 100);
+                                        lastday += 1;
+                                    }
+
+                                    let timeAfterMidnight = entry[0] - (currentday) * perday;
+                                    avg = timeAfterMidnight * middle;
+                                } else {
+                                    avg += (entry[0] - lastentry[0]) * (entry[1] + lastentry[1]) / 2;
+                                }
+                                return currentday;
+                            }
+
                             read.onsuccess = function(event) {
                                 var cursor = event.target.result;
                                 if (cursor) {
@@ -222,36 +248,17 @@ app.controller('myCtrl', function($scope, $http) {
                                         serdata.push(lastentry);
                                     }
                                     let entry = [cursor.value.date, cursor.value.value];
-                                    let currentday = Math.floor(cursor.value.date / perday);
-
-                                    if (currentday > lastday) {
-                                        let midnight = (lastday + 1) * perday;
-                                        let timeTillMidnight = midnight - lastentry[0];
-                                        let middle = (entry[1] + lastentry[1]) / 2;
-
-                                        avg += timeTillMidnight * middle;
-                                        avgTemps.push(Math.round(avg / perday * 100) / 100);
-
-                                        lastday += 1;
-                                        while (lastday < currentday) {
-                                            avgTemps.push(Math.round(middle * 100) / 100);
-                                            lastday += 1;
-                                        }
-
-                                        let timeAfterMidnight = entry[0] - (currentday) * perday;
-                                        avg = timeAfterMidnight * middle;
-                                    } else {
-                                        avg += (entry[0] - lastentry[0]) * (entry[1] + lastentry[1]) / 2;
-                                    }
-
+                                    lastday = processEntry(entry);
                                     lastentry = entry;
-                                    lastday = currentday;
 
                                     serdata.push(entry);
                                     cursor.continue();
                                 } else {
                                     if (serdata.length > 0) {
+                                        processEntry([verylastts, lastentry[1]]);
                                         serdata.push([verylastts, lastentry[1]]);
+
+                                        avgTemps.push(avg / (verylastts % perday));
                                     }
                                     fulfill([serdata, avgTemps]);
                                 }
@@ -264,9 +271,18 @@ app.controller('myCtrl', function($scope, $http) {
                                 var categories = [];
                                 let firstday = Math.floor(veryfirstts / perday) * perday;
                                 let lastday = Math.floor(verylastts / perday) * perday;
-                                for (let day = firstday; day < verylastts; day += perday * 1) {
-                                    let newday = new Date(day);
-                                    categories.push(newday.format('dd.mm.yy'));
+
+                                let lastfmt = new Date(firstday).format('dd.mm.yy');
+                                for (let day = firstday + perday; day < verylastts; day += perday) {
+                                    let fmt = new Date(day).format('dd.mm.yy');
+                                    if (fmt.substring(6) != lastfmt.substring(6)) {
+                                        categories.push(lastfmt + "-" + fmt);
+                                    } else if (fmt.substring(3) != lastfmt.substring(3)) {
+                                        categories.push(lastfmt.substring(0, 6) + "-" + fmt.substring(0, 6) + fmt.substring(6))
+                                    } else {
+                                        categories.push(lastfmt.substring(0, 3) + "-" + fmt.substring(0, 3) + fmt.substring(3))
+                                    }
+                                    lastfmt = fmt;
                                 }
 
 
