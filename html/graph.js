@@ -6,15 +6,15 @@ var visible = [false, true, true, false, false, true];
 
 app.controller('myCtrl', function($scope, $http) {
     function makediff(avgdata) {
-        if ($scope.showAbs) {
-            return avgdata;
-        } else {
-            var result = [];
-            for (let i = 1; i < avgdata.length; ++i) {
-                result.push(Math.round((avgdata[i] - avgdata[i - 1]) * 100) / 100);
-            }
-            return result;
+        var result = [];
+        for (let i = 1; i < avgdata.length; ++i) {
+            result.push(Math.round((avgdata[i][1] - avgdata[i - 1][1]) * 100) / 100);
         }
+        return result;
+    }
+
+    function adjustTimezone(day) {
+        return day + (new Date(day).getTimezoneOffset()) * 60 * 1000;
     }
 
     function toggleVisible(i) {
@@ -31,7 +31,7 @@ app.controller('myCtrl', function($scope, $http) {
                 if (series[i].name == $scope.selected_temp) {
                     seriesNew.push({
                         name: series[i].name,
-                        data: series[i].data,
+                        data: $scope.showAbs ? series[i].avg : series[i].data,
                         type: 'area',
                         visible: true
                     });
@@ -46,7 +46,7 @@ app.controller('myCtrl', function($scope, $http) {
             for (let i = 0; i < 6; ++i) {
                 seriesNew.push({
                     name: series[i].name,
-                    data: series[i].data,
+                    data: $scope.showAbs ? series[i].avg : series[i].data,
                     visible: visible[i],
                     events: {
                         legendItemClick: function(event) {
@@ -223,11 +223,11 @@ app.controller('myCtrl', function($scope, $http) {
                                     let middle = (entry[1] + lastentry[1]) / 2;
 
                                     avg += timeTillMidnight * middle;
-                                    avgTemps.push(Math.round(avg / perday * 100) / 100);
+                                    avgTemps.push([adjustTimezone(lastday * perday + perday / 2), Math.round(avg / perday * 100) / 100]);
 
                                     lastday += 1;
                                     while (lastday < currentday) {
-                                        avgTemps.push(Math.round(middle * 100) / 100);
+                                        avgTemps.push([adjustTimezone(lastday * perday + perday / 2), Math.round(middle * 100) / 100]);
                                         lastday += 1;
                                     }
 
@@ -258,7 +258,8 @@ app.controller('myCtrl', function($scope, $http) {
                                         processEntry([verylastts, lastentry[1]]);
                                         serdata.push([verylastts, lastentry[1]]);
 
-                                        avgTemps.push(avg / (verylastts % perday));
+                                        let lasttime = Math.floor(verylastts / perday) * perday + perday / 2;
+                                        avgTemps.push([adjustTimezone(lasttime), avg / (verylastts % perday)]);
                                     }
                                     fulfill([serdata, avgTemps]);
                                 }
@@ -310,7 +311,7 @@ app.controller('myCtrl', function($scope, $http) {
 
                                 let firstband = Math.ceil((veryfirstts + 1000) / perday) * perday;
                                 for (let day = firstband; day < verylastts; day += perday * 2) {
-                                    let newday = day + (new Date(day).getTimezoneOffset()) * 60 * 1000;
+                                    let newday = adjustTimezone(day);
                                     myChart.xAxis[0].addPlotBand({
                                         from: newday,
                                         to: newday + perday,
@@ -338,7 +339,10 @@ app.controller('myCtrl', function($scope, $http) {
         });
         myChart = Highcharts.chart('container', {
             chart: {
-                zoomType: 'x'
+                zoomType: 'x',
+                events: {
+                    click: $scope.toggleAbsDiff
+                }
             },
             title: {
                 text: 'Temperaturverlauf'
@@ -399,10 +403,7 @@ app.controller('myCtrl', function($scope, $http) {
         avgChart = Highcharts.chart('avgcontainer', {
             chart: {
                 zoomType: 'x',
-                type: 'column',
-                events: {
-                    click: $scope.toggleAbsDiff
-                }
+                type: 'column'
             },
             title: {
                 text: '<a href="#" onclick="toggleAbsDiff();return false;">Temperature</a>'
