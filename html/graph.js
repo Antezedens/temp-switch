@@ -345,7 +345,7 @@ app.controller('myCtrl', function($scope, $http) {
                 }
             },
             title: {
-                text: 'Temperaturverlauf'
+                text: ''
             },
             subtitle: {
                 //text: document.ontouchstart === undefined ?
@@ -406,7 +406,7 @@ app.controller('myCtrl', function($scope, $http) {
                 type: 'column'
             },
             title: {
-                text: '<a href="#" onclick="toggleAbsDiff();return false;">Temperature</a>'
+                text: ''
             },
             xAxis: {
                 categories: categories
