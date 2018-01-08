@@ -148,15 +148,23 @@ app.controller('myCtrl', function($scope, $http) {
         });
 
     //indexedDB.deleteDatabase('sensors');
-    var request = indexedDB.open('sensors', 3);
-    request.onupgradeneeded = function() {
+    var request = indexedDB.open('sensors', 4);
+    request.onupgradeneeded = function(event) {
         var db = this.result;
-        for (let i = 0; i < 10; ++i) {
-            let objName = 'data' + i;
-            if (db.objectStoreNames.contains(objName)) {
-                db.deleteObjectStore(objName);
+        if (event.oldVersion < 3) {
+
+            for (let i = 0; i < 10; ++i) {
+                let objName = 'data' + i;
+                if (db.objectStoreNames.contains(objName)) {
+                    db.deleteObjectStore(objName);
+                }
+                db.createObjectStore(objName, {
+                    keyPath: "date"
+                });
             }
-            db.createObjectStore(objName, {
+        } else {
+            db.deleteObjectStore("data3");
+            db.createObjectStore("data3", {
                 keyPath: "date"
             });
         }
@@ -243,7 +251,7 @@ app.controller('myCtrl', function($scope, $http) {
                                 var cursor = event.target.result;
                                 if (cursor) {
                                     if (serdata.length == 0) {
-                                        lastentry = [veryfirstts, cursor.value.value];
+                                        lastentry = [cursor.value.date - 1000 * 60 * 5, cursor.value.value];
                                         lastday = Math.floor(veryfirstts / perday);
                                         serdata.push(lastentry);
                                     }
