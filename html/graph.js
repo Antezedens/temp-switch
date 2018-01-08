@@ -3,12 +3,26 @@ var myChart;
 var avgChart;
 var app = angular.module('myApp', []);
 var visible = [false, true, true, false, false, true];
+var veryfirstavgday;
+let perday = 24 * 3600 * 1000;
 
 app.controller('myCtrl', function($scope, $http) {
+    function round2(input) {
+        return Math.round(input * 100) / 100.0;
+    }
+
     function makediff(avgdata) {
+        if (avgdata.length < 2) {
+            return [];
+        }
         var result = [];
+        var day = veryfirstavgday + perday;
+        while (avgdata[0][0] > day) {
+            day += perday;
+            result.push(0);
+        }
         for (let i = 1; i < avgdata.length; ++i) {
-            result.push(Math.round((avgdata[i][1] - avgdata[i - 1][1]) * 100) / 100);
+            result.push(round2(avgdata[i][1] - avgdata[i - 1][1]));
         }
         return result;
     }
@@ -199,7 +213,6 @@ app.controller('myCtrl', function($scope, $http) {
                     var promises = [];
                     var verylastts = response.data.lastts * 1000 * 60;
                     var veryfirstts = 1513454400 * 1000.0; // 16.12.2017
-                    let perday = 24 * 3600 * 1000;
                     // var veryfirstts = 1512086400 * 1000.0; // 1.12.2017
                     veryfirstts = Math.ceil(veryfirstts / perday) * perday;
 
@@ -231,11 +244,11 @@ app.controller('myCtrl', function($scope, $http) {
                                     let middle = (entry[1] + lastentry[1]) / 2;
 
                                     avg += timeTillMidnight * middle;
-                                    avgTemps.push([adjustTimezone(lastday * perday + perday / 2), Math.round(avg / perday * 100) / 100]);
+                                    avgTemps.push([adjustTimezone(lastday * perday + perday / 2), round2(avg / perday)]);
 
                                     lastday += 1;
                                     while (lastday < currentday) {
-                                        avgTemps.push([adjustTimezone(lastday * perday + perday / 2), Math.round(middle * 100) / 100]);
+                                        avgTemps.push([adjustTimezone(lastday * perday + perday / 2), round2(middle)]);
                                         lastday += 1;
                                     }
 
@@ -251,8 +264,10 @@ app.controller('myCtrl', function($scope, $http) {
                                 var cursor = event.target.result;
                                 if (cursor) {
                                     if (serdata.length == 0) {
-                                        lastentry = [cursor.value.date - 1000 * 60 * 5, cursor.value.value];
-                                        lastday = Math.floor(veryfirstts / perday);
+                                        let before = cursor.value.date - 1000;
+                                        lastentry = [before, cursor.value.value];
+                                        lastday = Math.floor(before / perday);
+                                        avg = cursor.value.value * (before - lastday * perday);
                                         serdata.push(lastentry);
                                     }
                                     let entry = [cursor.value.date, cursor.value.value];
@@ -267,7 +282,7 @@ app.controller('myCtrl', function($scope, $http) {
                                         serdata.push([verylastts, lastentry[1]]);
 
                                         let lasttime = Math.floor(verylastts / perday) * perday + perday / 2;
-                                        avgTemps.push([adjustTimezone(lasttime), avg / (verylastts % perday)]);
+                                        avgTemps.push([adjustTimezone(lasttime), round2(avg / (verylastts % perday))]);
                                     }
                                     fulfill([serdata, avgTemps]);
                                 }
@@ -280,6 +295,7 @@ app.controller('myCtrl', function($scope, $http) {
                                 var categories = [];
                                 let firstday = Math.floor(veryfirstts / perday) * perday;
                                 let lastday = Math.floor(verylastts / perday) * perday;
+                                veryfirstavgday = firstday;
 
                                 let lastfmt = new Date(firstday).format('dd.mm.yy');
                                 for (let day = firstday + perday; day < verylastts; day += perday) {
