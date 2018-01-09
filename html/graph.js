@@ -158,6 +158,7 @@ app.controller('myCtrl', function($scope, $http) {
 
     $http.get("/sensors")
         .then(function(response) {
+            $scope.tempdata = new Date().format('dd.mm. HH:MM');
             $scope.sensors = response.data;
         });
 

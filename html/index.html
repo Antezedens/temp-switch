@@ -107,7 +107,7 @@ td {
 <col width="80%">
 <tr><td>
 
-<h3>Sensoren<p style="font-size:10px">Size {{ datasize }}</p></h3>
+<h3>Sensoren<p style="font-size:10px">Size {{ datasize }} @ {{ tempdata }}</p></h3>
 <table cellspacing="10">
 <tr ng-repeat="t in sensors.temperatures" ng-click="toggle(t.name)" ng-class="selected_temp == null || selected_temp == t.name ? 'colblack' : 'colgrey'">
 <td>{{ t.name }}</td>
