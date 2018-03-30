@@ -1,2 +1,2 @@
-dht: dht.c
-	cc -Wall dht.c -o dht -lwiringPi
+dht: dht22.c
+	cc -Wall locking.c dht22.c -o dht -lwiringPi
