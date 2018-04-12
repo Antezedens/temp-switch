@@ -45,56 +45,46 @@ void delay(int ms) {
 	delayMicroseconds(ms * 1000);
 }
 
+int mofile;
+int wrfile;
+int rdfile;
 
 void pinMode(int pin, int inout) {
-	int file = open("/sys/class/gpio/gpio10/direction", O_WRONLY);
+	lseek(mofile, 0, SEEK_SET);
 	if (inout == OUTPUT) {
-		write(file, "out\n", 4);
+		write(mofile, "out\n", 4);
 	} else {
-		write(file, "in\n", 3);
+		write(mofile, "in\n", 3);
 	}
-	close(file);
 }
 
 void digitalWrite(int pin, int value) {
-	int file = open("/sys/class/gpio/gpio10/value", O_WRONLY);
+	lseek(wrfile, 0, SEEK_SET);
 	if (value == HIGH) {
-		write(file, "1\n", 2);
+		write(wrfile, "1\n", 2);
 	} else {
-		write(file, "0\n", 2);
+		write(wrfile, "0\n", 2);
 	}
-	close(file);
 }
+
 int digitalRead(int pin) {
 	int result;
-	int file = open("/sys/class/gpio/gpio10/value", O_RDONLY);
 	char v = 'x';
-	read(file, &v, 1);
-	close(file);
+	lseek(rdfile, 0, SEEK_SET);
+	read(rdfile, &v, 1);
 	result = v == '1';
 	//printf("%c>%d\n", v, result);
 	return result;
 }
 
 
-static uint8_t sizecvt(const int read)
-{
-  /* digitalRead() and friends from wiringpi are defined as returning a value
-  < 256. However, they are returned as int() types. This is a safety function */
-
-  if (read > 255 || read < 0)
-  {
-    printf("Invalid data from wiringPi library\n");
-    exit(EXIT_FAILURE);
-  }
-  return (uint8_t)read;
+static void waitfor(int v) {
+	while (digitalRead(DHTPIN) != v);
 }
 
 static int read_dht22_dat()
 {
-  uint8_t laststate = HIGH;
-  uint8_t counter = 0;
-  uint8_t j = 0, i;
+  uint8_t i;
 
   dht22_dat[0] = dht22_dat[1] = dht22_dat[2] = dht22_dat[3] = dht22_dat[4] = 0;
 
@@ -106,37 +96,36 @@ static int read_dht22_dat()
   delay(18);
   // then pull it up for 40 microseconds
   digitalWrite(DHTPIN, HIGH);
-  delayMicroseconds(40); 
+  //delayMicroseconds(1); 
   // prepare to read the pin
   pinMode(DHTPIN, INPUT);
 
+  waitfor(0);
+	waitfor(1);
+	waitfor(0);
+
   // detect change and read data
-  for ( i=0; i< MAXTIMINGS; i++) {
-    counter = 0;
-    while (sizecvt(digitalRead(DHTPIN)) == laststate) {
-      counter++;
-      delayMicroseconds(2);
-      if (counter == 255) {
-        break;
-      }
-    }
-    laststate = sizecvt(digitalRead(DHTPIN));
-
-    if (counter == 255) break;
-
-    // ignore first 3 transitions
-    if ((i >= 4) && (i%2 == 0)) {
-      // shove each bit into the storage bytes
-      dht22_dat[j/8] <<= 1;
-      if (counter > 16)
-        dht22_dat[j/8] |= 1;
-      j++;
-    }
+  for ( i=0; i< 40; i++) {
+		struct timespec start, stop;
+		waitfor(1);
+		clock_gettime(CLOCK_REALTIME, &start);
+		waitfor(0);
+		clock_gettime(CLOCK_REALTIME, &stop);
+				
+		long diff = stop.tv_nsec - start.tv_nsec;
+		if (diff < 0) {
+			diff += 1000 * 1000 * 1000;
+		}
+		
+		dht22_dat[i/8] <<= 1;
+		if (diff > 49*1000) {
+			dht22_dat[i/8] |= 1;
+		}
   }
 
   // check we read 40 bits (8bit x 5 ) + verify checksum in the last byte
   // print it out if data is good
-  if ((j >= 40) && 
+  if ((i >= 40) && 
       (dht22_dat[4] == ((dht22_dat[0] + dht22_dat[1] + dht22_dat[2] + dht22_dat[3]) & 0xFF)) ) {
         float t, h;
         h = (float)dht22_dat[0] * 256 + (float)dht22_dat[1];
@@ -147,6 +136,7 @@ static int read_dht22_dat()
 
 
     printf("Humidity = %.2f %% Temperature = %.2f *C \n", h, t );
+		printf("Data ok %02x-%02x-%02x-%02x = %02x\n", dht22_dat[0], dht22_dat[1], dht22_dat[2], dht22_dat[3], dht22_dat[4]);
     return 1;
   }
   else
@@ -169,6 +159,10 @@ void testdelay(void) {
 
 int main (int argc, char *argv[])
 {
+	mofile = open("/sys/class/gpio/gpio10/direction", O_WRONLY);
+	wrfile = open("/sys/class/gpio/gpio10/value", O_WRONLY);
+	rdfile = open("/sys/class/gpio/gpio10/value", O_RDONLY);
+
 testdelay();
 
   int lockfd;
