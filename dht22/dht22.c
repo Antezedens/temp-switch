@@ -14,11 +14,15 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <time.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sys/syscall.h>
 
 #include "locking.h"
 
 #define MAXTIMINGS 85
-static int DHTPIN = 10;
+static int DHTPIN = 12;
 static int dht22_dat[5] = {0,0,0,0,0};
 
 void delayMicroseconds(int us) {
@@ -127,22 +131,22 @@ static int read_dht22_dat()
   // print it out if data is good
   if ((i >= 40) && 
       (dht22_dat[4] == ((dht22_dat[0] + dht22_dat[1] + dht22_dat[2] + dht22_dat[3]) & 0xFF)) ) {
-        float t, h;
-        h = (float)dht22_dat[0] * 256 + (float)dht22_dat[1];
-        h /= 10;
-        t = (float)(dht22_dat[2] & 0x7F)* 256 + (float)dht22_dat[3];
-        t /= 10.0;
-        if ((dht22_dat[2] & 0x80) != 0)  t *= -1;
+        int t;
+				int h;
+        h = dht22_dat[0] * 256 + dht22_dat[1];
+        t = dht22_dat[2] * 256 + dht22_dat[3];
+        if (t & 0x8000) {
+					t |= 0xffff0000;
+				}
 
 
-    printf("Humidity = %.2f %% Temperature = %.2f *C \n", h, t );
-		printf("Data ok %02x-%02x-%02x-%02x = %02x\n", dht22_dat[0], dht22_dat[1], dht22_dat[2], dht22_dat[3], dht22_dat[4]);
-    return 1;
+    printf("H=%d.%d T=%d.%d \n", h/10, h%10, t/10, t%10 );
+    return 0;
   }
   else
   {
     printf("Data not good, skip %02x-%02x-%02x-%02x = %02x\n", dht22_dat[0], dht22_dat[1], dht22_dat[2], dht22_dat[3], dht22_dat[4]);
-    return 0;
+    return 1;
   }
 }
 
@@ -156,57 +160,46 @@ void testdelay(void) {
 	printf("%ld -> %ld = %ld\n", ts.tv_nsec, ts2.tv_nsec, ts2.tv_nsec - ts.tv_nsec);
 }
 
+void stop(int ignore) {
+	printf("timeout\n");
+	exit(1);
+}
+
 
 int main (int argc, char *argv[])
 {
-	mofile = open("/sys/class/gpio/gpio10/direction", O_WRONLY);
-	wrfile = open("/sys/class/gpio/gpio10/value", O_WRONLY);
-	rdfile = open("/sys/class/gpio/gpio10/value", O_RDONLY);
-
-testdelay();
+	setpriority(PRIO_PROCESS, syscall(SYS_gettid), -19);
+  signal(SIGALRM, stop);
+	alarm(1);
 
   int lockfd;
-  int tries = 100;
 
   if (argc < 2)
-    printf ("usage: %s <pin> (<tries>)\ndescription: pin is the wiringPi pin number\nusing 7 (GPIO 4)\nOptional: tries is the number of times to try to obtain a read (default 100)",argv[0]);
+    printf ("usage: %s <pin>\n",argv[0]);
   else
     DHTPIN = atoi(argv[1]);
-   
 
-  if (argc == 3)
-    tries = atoi(argv[2]);
-
-  if (tries < 1) {
-    printf("Invalid tries supplied\n");
-    exit(EXIT_FAILURE);
-  }
-
-  printf ("Raspberry Pi wiringPi DHT22 reader\nwww.lolware.net\nPIN: %d\n", DHTPIN) ;
+  char buf[64];
+	sprintf(buf, "/sys/class/gpio/gpio%d/direction", DHTPIN);
+	mofile = open(buf, O_WRONLY);
+	sprintf(buf, "/sys/class/gpio/gpio%d/value", DHTPIN);
+	wrfile = open(buf, O_WRONLY);
+ 	rdfile = open(buf, O_RDONLY);
 
   lockfd = open_lockfile(LOCKFILE);
 
   if (wiringPiSetupGpio () == -1)
     exit(EXIT_FAILURE) ;
 	
-
-  //pinMode(DHTPIN, OUTPUT);
-  //printf("mode out exit\n");
-  //return -1;
-
   if (setuid(getuid()) < 0)
   {
     perror("Dropping privileges failed\n");
     exit(EXIT_FAILURE);
   }
 
-  while (read_dht22_dat() == 0 && tries--) 
-  {
-     delay(1000); // wait 1sec to refresh
-  }
+  int res = read_dht22_dat();
 
-  delay(1500);
   close_lockfile(lockfd);
 
-  return 0 ;
+  return res ;
 }
