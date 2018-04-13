@@ -21,12 +21,13 @@ for (let i=0; i<setup.sensors.length; ++i) {
 	}
 }
 console.log(w1_sensors);
+var dht22 = parsetemp.getDHT22(12);
 
 parsetemp.getw1temps(w1_sensors).then(function(v) {
 	console.log("t: " + v);
 	cput = parseInt(fs.readFileSync('/sys/devices/virtual/thermal/thermal_zone0/temp'));
 	//console.log("cpu: " + cput);
-	db.run('INSERT INTO temp (h0, t0, t1, t2, t3, t4, t5, cput) VALUES (null, null, ' + v +',' + cput + ')', errfct);
+	db.run('INSERT INTO temp (h0, t0, t1, t2, t3, t4, t5, cput) VALUES (' + dht22[humidity] +', ' + dht22[temp] + ', ' + v +',' + cput + ')', errfct);
 	//console.log('INSERT INTO temp (h0, t0, t1, t2, t3, t4, t5, cput) VALUES (null, null, ' + v +',' + cput + ')');
 	db.close();
 });
