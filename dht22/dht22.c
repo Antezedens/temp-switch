@@ -179,19 +179,18 @@ int main (int argc, char *argv[])
   else
     DHTPIN = atoi(argv[1]);
 
-  char buf[64];
+ 	char buf[64];
 	sprintf(buf, "/sys/class/gpio/gpio%d/direction", DHTPIN);
 	mofile = open(buf, O_WRONLY);
 	if (mofile <= 0) {
-		char buf[64];
-		sprintf(buf, "/sys/class/gpio/export", DHTPIN);		
-		int exportfile = open(buf, O_WRONLY);
-		int len = sprintf(buf, "%d\n", DHTPIN);
-		write(exportfile, buf, len);
+		int exportfile = open("/sys/class/gpio/export", O_WRONLY);
+		char pin[32];
+		int len = sprintf(pin, "%d\n", DHTPIN);
+		write(exportfile, pin, len);
 		close(exportfile);
 		sprintf(buf, "/sys/class/gpio/gpio%d/direction", DHTPIN);
 		mofile = open(buf, O_WRONLY);
-		printf("exported pin!\n")
+		printf("exported pin!\n");
 	}
 	
 	sprintf(buf, "/sys/class/gpio/gpio%d/value", DHTPIN);
