@@ -146,6 +146,27 @@ app.controller('myCtrl', function($scope, $http) {
         }
         updateSeries();
     }
+    $scope.zoom = function(range) {
+        let n = range[0];
+        var now = new Date();
+        var from;
+        switch (range[1]) {
+          case 'm':
+            from = now - 24 * 3600 * 1000 * 31 * n;
+            break;
+          case 'w':
+            from = now - 24 * 3600 * 1000 * 7 * n;
+            break;
+          case 'd':
+            from = now - 24 * 3600 * 1000 * n;
+            break;
+          case 'r':
+            myChart.xAxis[0].setExtremes(null, null);
+            return;
+        }
+        
+        myChart.xAxis[0].setExtremes(from, now);
+    }
     $scope.toggleAbsDiff = function() {
         $scope.showAbs = !$scope.showAbs;
         updateSeries();

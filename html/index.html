@@ -106,7 +106,18 @@ td {
 <col width="20%">
 <col width="80%">
 <tr><td>
-
+<input type='button' value="r" ng-click="zoom('0r')">
+<!-- <input type='button' value="2m" ng-click="zoom('2m')"> -->
+<input type='button' value="m" ng-click="zoom('1m')">
+<!--<input type='button' value="3w" ng-click="zoom('3w')"> -->
+<input type='button' value="2w" ng-click="zoom('2w')">
+<input type='button' value="1w" ng-click="zoom('1w')">
+<!-- <input type='button' value="6d" ng-click="zoom('6d')">
+<input type='button' value="5d" ng-click="zoom('5d')">
+<input type='button' value="4d" ng-click="zoom('4d')"> -->
+<input type='button' value="3d" ng-click="zoom('3d')">
+<input type='button' value="2d" ng-click="zoom('2d')">
+<input type='button' value="1d" ng-click="zoom('1d')">
 <h3>Sensoren<p style="font-size:10px">Size {{ datasize }} @ {{ tempdata }}</p></h3>
 <table cellspacing="10">
 <tr ng-repeat="t in sensors.temperatures" ng-click="toggle(t.name)" ng-class="selected_temp == null || selected_temp == t.name ? 'colblack' : 'colgrey'">
