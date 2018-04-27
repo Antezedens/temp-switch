@@ -80,6 +80,12 @@ app.controller('myCtrl', function($scope, $http) {
                 });
             }
         }
+        seriesNew.push({
+          name: "Humidity",
+          yAxis: 1,
+          data: $scope.showAbs ? series[7].avg : series[7].data
+        });
+        
         for (x in $scope.relais) {
             if ($scope.relais[x].shown) {
                 seriesNew.push({
@@ -408,12 +414,22 @@ app.controller('myCtrl', function($scope, $http) {
                     text: 'Temperature'
                 },
             }, {
+                opposite: true,
+                labels: {
+                    format: '{value}%'
+                },
+                title: {
+                    text: 'Humidity'
+                }
+            },
+            /*
+            {
                 ceiling: 1,
                 opposite: true,
                 title: {
                     text: 'State'
                 }
-            }],
+            }*/],
             legend: {
                 enabled: true
             },

@@ -73,6 +73,10 @@ function f(s) {
     return " round(t" + s + ", 2) as t" + s + ",";
 }
 
+function hu(s) {
+    return " round(h" + s + ", 1) as h" + s + ",";
+}
+
 exports.temperatures = function(req, res) {
     var fromts = req.query.ts;
     /*fs.writeFileSync("/tmp/test.txt", "[[2, 100], [3,120], [4, 110]]");
@@ -94,6 +98,8 @@ exports.temperatures = function(req, res) {
         names.push(setup.sensors[i].name);
         data.push([]);
     }
+    names.push('humidity');
+
 
     var lastts = 0;
     var lastvalues = [0, 0, 0, 0, 0, 0];
@@ -137,7 +143,7 @@ exports.temperatures = function(req, res) {
         }
     }
 
-    db.each("SELECT strftime('%s', date) as ts," + f(0) + f(1) + f(2) + f(3) + f(4) + f(5) + " cput FROM temp ORDER BY date", function(err, row) {
+    db.each("SELECT strftime('%s', date) as ts," + f(0) + f(1) + f(2) + f(3) + f(4) + f(5) + hu(0) + " cput FROM temp ORDER BY date", function(err, row) {
         let ts = Math.floor(row.ts / 60);
         addpoint(ts, 0, row.t0, lasttss, 0.15);
         addpoint(ts, 1, row.t1, lasttss, 0.15);
@@ -146,6 +152,7 @@ exports.temperatures = function(req, res) {
         addpoint(ts, 4, row.t4, lasttss, 0.15);
         addpoint(ts, 5, row.t5, lasttss, 0.15);
         addpoint(ts, 6, row.cput, lasttss, 1.5);
+        addpoint(ts, 7, row.h0, lasttss, 0.15);
         lastts = ts;
         //data.push([row.ts, row.t0, row.t1, row.t2, row.t3, row.t4, row.t5, row.cput]);
     }, function(err) {

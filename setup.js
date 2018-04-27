@@ -8,7 +8,7 @@ if (user == "fuchs") {
 exports.sensors = [
 {
 	gpio: "xx",
-	name: "n/a"
+	name: "DHT22"
 },
 {
 	w1_id: "28-041780cb13ff",
