@@ -90,7 +90,7 @@ app.controller('myCtrl', function($scope, $http) {
             if ($scope.relais[x].shown) {
                 seriesNew.push({
                     name: $scope.relais[x].name,
-                    yAxis: 1,
+                    yAxis: 2,
                     data: $scope.relaisHistory[$scope.relais[x].gpio]
                 });
             }
@@ -415,6 +415,8 @@ app.controller('myCtrl', function($scope, $http) {
                 },
             }, {
                 opposite: true,
+                ceiling: 100,
+                floor: 0,
                 labels: {
                     format: '{value}%'
                 },
@@ -422,14 +424,14 @@ app.controller('myCtrl', function($scope, $http) {
                     text: 'Humidity'
                 }
             },
-            /*
+            
             {
                 ceiling: 1,
                 opposite: true,
                 title: {
-                    text: 'State'
+                    text: ''
                 }
-            }*/],
+            }],
             legend: {
                 enabled: true
             },
