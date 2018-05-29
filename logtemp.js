@@ -32,11 +32,15 @@ try {
 	cput = "null";
 }
 
-var sql = 'INSERT INTO temp (h0, t0, t1, t2, t3, t4, t5, cput) VALUES (' + dht22['humidity'] +', ' + dht22['temp'] + ', ' + v +',' + cput + ')';
-console.log("sql: " + sql);
-db.run(sql, errfct);
-//console.log('INSERT INTO temp (h0, t0, t1, t2, t3, t4, t5, cput) VALUES (null, null, ' + v +',' + cput + ')');
-db.close();
+parsetemp.getinternet((temp, humid) => {
+	var sql = 'INSERT INTO temp (h0, t0, t1, t2, t3, t4, t5, cput, internet_t, internet_h) VALUES (' + dht22['humidity'] +', ' + dht22['temp'] + ', ' + v +',' + cput + 
+	', ' + temp + ',' + humid + ')';
+	console.log("sql: " + sql);
+	db.run(sql, errfct);
+	//console.log('INSERT INTO temp (h0, t0, t1, t2, t3, t4, t5, cput) VALUES (null, null, ' + v +',' + cput + ')');
+	db.close();
+	
+});
 
 require('./checkrelaisstate').check();
 // /sys/devices/virtual/thermal/thermal_zone0/temp
