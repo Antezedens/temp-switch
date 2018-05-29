@@ -17,7 +17,7 @@ exports.sensors = [
 },
 {
 	w1_id: "28-041780ced0ff",
-	name: "Erde",
+	name: "Wasser",
 	color: "black"
 },
 {
