@@ -56,13 +56,15 @@ exports.sensors = function(req, res) {
     var temps;
     db.get("SELECT * FROM temp ORDER BY date DESC LIMIT 1", function(err, row) {
         data.humidity = row.h0;
-        temps = [row.t0, row.t1, row.t2, row.t3, row.t4, row.t5, row.cput];
+        data.humidity_out = row.internet_h;
+        temps = [row.t0, row.t1, row.t2, row.t3, row.t4, row.t5, row.cput, row.h0, row.internet_t, row.internet_h];
 
         data.temperatures = [];
         for (let i = 0; i < setup.sensors.length; ++i) {
             var temp = {};
             temp.name = setup.sensors[i].name;
-            temp.value = temps[i];
+            temp.value = Math.round(temps[i] * 100) / 100.0;
+            temp.unit = setup.sensors[i].unit;
             data.temperatures.push(temp)
         }
         res.json(data);
@@ -91,19 +93,17 @@ exports.temperatures = function(req, res) {
     //let buffer = fs.readFileSync('/tmp/test.gz', 'binary')
     var names = [];
     var data = [
-        []
     ];
 
     for (let i = 0; i < setup.sensors.length; ++i) {
         names.push(setup.sensors[i].name);
         data.push([]);
     }
-    names.push('humidity');
 
 
     var lastts = 0;
-    var lastvalues = [0, 0, 0, 0, 0, 0];
-    var lasttss = [0, 0, 0, 0, 0, 0];
+    var lastvalues = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var lasttss = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     var transition = [];
 
     function addpoint(ts, i, value, lasttss, delta) {
@@ -143,7 +143,7 @@ exports.temperatures = function(req, res) {
         }
     }
 
-    db.each("SELECT strftime('%s', date) as ts," + f(0) + f(1) + f(2) + f(3) + f(4) + f(5) + hu(0) + " cput FROM temp ORDER BY date", function(err, row) {
+    db.each("SELECT strftime('%s', date) as ts," + f(0) + f(1) + f(2) + f(3) + f(4) + f(5) + hu(0) + " cput, round(internet_t, 2) as internet_t, internet_h FROM temp ORDER BY date", function(err, row) {
         let ts = Math.floor(row.ts / 60);
         addpoint(ts, 0, row.t0, lasttss, 0.15);
         addpoint(ts, 1, row.t1, lasttss, 0.15);
@@ -153,6 +153,8 @@ exports.temperatures = function(req, res) {
         addpoint(ts, 5, row.t5, lasttss, 0.15);
         addpoint(ts, 6, row.cput, lasttss, 1.5);
         addpoint(ts, 7, row.h0, lasttss, 0.15);
+        addpoint(ts, 8, row.internet_t, lasttss, 0.15);
+        addpoint(ts, 9, row.internet_h, lasttss, 1.5);
         lastts = ts;
         //data.push([row.ts, row.t0, row.t1, row.t2, row.t3, row.t4, row.t5, row.cput]);
     }, function(err) {

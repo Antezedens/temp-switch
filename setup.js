@@ -37,5 +37,16 @@ exports.sensors = [
 },
 {
 	name: "CPU"
+},
+{
+	name: "Hum in",
+	unit: "%"
+},
+{	
+	name: "Temp out"
+},
+{
+	name: "Hum out",
+	unit: "%"
 }
 ]

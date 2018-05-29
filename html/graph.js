@@ -81,9 +81,21 @@ app.controller('myCtrl', function($scope, $http) {
             }
         }
         seriesNew.push({
-          name: "Humidity",
+          name: "Hum in",
           yAxis: 1,
           data: $scope.showAbs ? series[7].avg : series[7].data
+        });
+
+        seriesNew.push({
+          name: "Temp Out",
+          yAxis: 0,
+          data: $scope.showAbs ? series[8].avg : series[8].data
+        });
+        
+        seriesNew.push({
+          name: "Hum out",
+          yAxis: 1,
+          data: $scope.showAbs ? series[9].avg : series[9].data
         });
         
         for (x in $scope.relais) {
@@ -243,6 +255,7 @@ app.controller('myCtrl', function($scope, $http) {
                     var veryfirstts = 1513454400 * 1000.0; // 16.12.2017
                     // var veryfirstts = 1512086400 * 1000.0; // 1.12.2017
                     veryfirstts = Math.ceil(veryfirstts / perday) * perday;
+                    console.log(names);
 
                     for (let i = 0; i < names.length; ++i) {
 
@@ -251,6 +264,7 @@ app.controller('myCtrl', function($scope, $http) {
                             var avgTemps = [];
                             var lastentry = [];
                             var lastday;
+                            console.log('store: data' + i);
                             var trans = db.transaction(['data' + i], 'readwrite');
                             var store = trans.objectStore('data' + i);
                             var avg = 0;
