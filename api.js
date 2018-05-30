@@ -37,13 +37,17 @@ exports.setRelais = function(req, res) {
                     for (let j = 0; j < relais.length; ++j) {
                         if (relais[j].name == excludes || relais[j].gpio == excludes) {
                             relais[j].on = false;
-                            relais[j].switching = "";
+                            relais[j].turnon = "";
+                            relais[j].turnoff = "";
                         }
                     }
                 }
             }
-            if ('switching' in body) {
-                relais[i].switching = body.switching;
+            if ('turnon' in body) {
+                relais[i].turnon = body.turnon;
+            }
+            if ('turnoff' in body) {
+                relais[i].turnoff = body.turnoff;
             }
         }
     }
@@ -92,8 +96,7 @@ exports.temperatures = function(req, res) {
     //res.set('Content-type', 'application/x-gzip');
     //let buffer = fs.readFileSync('/tmp/test.gz', 'binary')
     var names = [];
-    var data = [
-    ];
+    var data = [];
 
     for (let i = 0; i < setup.sensors.length; ++i) {
         names.push(setup.sensors[i].name);

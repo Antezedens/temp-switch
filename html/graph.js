@@ -122,10 +122,32 @@ app.controller('myCtrl', function($scope, $http) {
                 $scope.relais = response.data;
                 for (i = 0; i < $scope.relais.length; ++i) {
                     $scope.relais[i].checked = $scope.relais[i].on
-                    if ($scope.relais[i].switching != "") {
-                        let d = new Date($scope.relais[i].switching);
-                        //let d = $scope.relais[i].switching;
-                        $scope.relais[i].switchingTime = d.format('dd.mm. HH:MM');
+                    $scope.relais[i].switching = "";
+                    var ton = "";
+                    if (parseInt($scope.relais[i].turnon) > 0) {
+                        let d = new Date($scope.relais[i].turnon);
+                        ton = d.format('dd.mm. HH:MM');
+                    }
+                    if (parseInt($scope.relais[i].turnoff) > 0) {
+                        let d = new Date($scope.relais[i].turnoff);
+                        var toff = d.format('dd.mm. HH:MM');
+                        if (ton != "") {
+                          if (toff.substring(0, 5) == ton.substring(0, 5)) {
+                            $scope.relais[i].switching = ton + " - " + d.format('HH:MM');
+                          } 
+                          else {
+                            $scope.relais[i].switching = ton + " - " + toff;
+                          }
+                        }
+                        else {
+                          $scope.relais[i].switching = toff;
+                        }
+                    }
+                    else {
+                      $scope.relais[i].switching = ton;
+                    }
+                    if ($scope.relais[i].switching.startsWith(new Date().format('dd.mm. '))) {
+                      $scope.relais[i].switching = $scope.relais[i].switching.substring(7);
                     }
                 }
             }, function(err) {
@@ -140,7 +162,8 @@ app.controller('myCtrl', function($scope, $http) {
         $http.post("/relais", {
             "name": name,
             "state": checked,
-            "switching": ""
+            "turnon": "",
+            "turnoff": ""
         }).then(function(response) {
             $scope.updateRelais();
         });
@@ -151,7 +174,26 @@ app.controller('myCtrl', function($scope, $http) {
         $http.post("/relais", {
             "name": name,
             "state": true,
-            "switching": tomorrow
+            "turnon": "",
+            "turnoff": tomorrow
+        }).then(function(response) {
+            $scope.updateRelais();
+        });
+    }
+    $scope.setRelaisExtraTime = function(name) {
+        var now = new Date();
+        var turnon = new Date();
+        turnon.setUTCHours(18, 55, 0, 0);
+        if (turnon < now) {
+          turnon.setUTCHours(turnon.getHours() + 24);
+        }
+        var turnoff = new Date(turnon.getTime());
+        turnoff.setUTCHours(turnoff.getUTCHours() + 3);
+        $http.post("/relais", {
+            "name": name,
+            "turnon": turnon,
+            "turnoff": turnoff,
+            "extra": true
         }).then(function(response) {
             $scope.updateRelais();
         });

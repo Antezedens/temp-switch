@@ -140,10 +140,17 @@ td {
 </td>
 <!--<td width = '40px' ng-mouseover="open = true" ng-mouseleave="open = false"> -->
 <td>
- <button class="button button1" type="button" ng-show="x.switching == ''" ng-click="setRelais24(x.name)"  >
-        24h
+ <button class="button button1" type="button" ng-show="x.switching != 'xxx'" ng-click="setRelais24(x.name)"  >
+        24
  </button>
- {{ x.switchingTime }}
+</td>
+<td>
+  <button class="button button1" type="button" ng-show="x.switching != 'xxx'" ng-click="setRelaisExtraTime(x.name)"  >
+         +
+  </button>
+</td>
+<td>
+{{ x.switching }}
 </td>
 </tr>
 </table>

@@ -1,52 +1,63 @@
 [
   {
     "name": "r1",
-    "on": true,
-    "switching": "",
-    "gpio": 198
+    "on": false,
+    "gpio": 198,
+    "turnon": "",
+    "turnoff": ""
   },
   {
     "name": "r2",
     "on": false,
-    "switching": "",
     "gpio": 199,
-    "excludes": 7
+    "excludes": 7,
+    "turnon": "",
+    "turnoff": ""
   },
   {
     "name": "r3",
-    "on": true,
-    "switching": "",
+    "on": false,
     "gpio": 7,
-    "excludes": 199
+    "excludes": 199,
+    "turnon": "",
+    "turnoff": ""
   },
   {
     "name": "r4",
-    "on": true,
-    "switching": "",
-    "gpio": 19
+    "on": false,
+    "gpio": 19,
+    "turnon": "",
+    "turnoff": ""
   },
   {
-    "name": "r5",
+    "name": "Immer",
     "on": true,
-    "switching": "",
-    "gpio": 14
+    "gpio": 14,
+    "turnon": "",
+    "turnoff": ""
   },
   {
-    "name": "r6",
-    "on": true,
+    "name": "Lüfter",
+    "on": false,
     "switching": "",
-    "gpio": 16
+    "gpio": 16,
+    "turnon": "",
+    "turnoff": ""
   },
   {
-    "name": "r7",
-    "on": true,
+    "name": "Pumpe an",
+    "on": false,
     "switching": "",
-    "gpio": 15
+    "gpio": 15,
+    "turnon": "",
+    "turnoff": ""
   },
   {
-    "name": "r8",
-    "on": true,
+    "name": "Pumpe aus",
+    "on": false,
     "switching": "",
-    "gpio": 3
+    "gpio": 3,
+    "turnon": "",
+    "turnoff": ""
   }
 ]

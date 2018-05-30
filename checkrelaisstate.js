@@ -42,16 +42,23 @@ function gpioState(pin, state) {
 function update(relais) {
   console.log("update: " + relais);
   for (let i=0; i<relais.length; ++i) {
-    let switching = relais[i].switching;
-    console.log("switching " + switching);
-    if (switching != "" && new Date(switching) < new Date()) {
-      console.log("time to switch! " + relais[i].gpio);
+    let turnon = relais[i].turnon;
+    let turnoff = relais[i].turnoff;
+    console.log("turnon/off " + turnon + "/" + turnoff);
+    if (turnon != "" && new Date(turnon) < new Date()) {
+      console.log("time to turnon! " + relais[i].gpio);
+      relais[i].on = true;
+      relais[i].turnon = "";
+      exports.writeRelais(relais);
+    }
+    if (turnoff != "" && new Date(turnoff) < new Date()) {
+      console.log("time to turnoff! " + relais[i].gpio);
       relais[i].on = false;
-      relais[i].switching = "";
+      relais[i].turnoff = "";
       exports.writeRelais(relais);
     }
 
-    gpioState(relais[i].gpio, relais[i].on, relais[i].switching);
+    gpioState(relais[i].gpio, relais[i].on);
   }
 }
 
