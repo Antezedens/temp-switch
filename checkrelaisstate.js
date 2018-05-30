@@ -42,6 +42,7 @@ function gpioState(pin, state) {
 function absolute_humidity(temp, rel_hum) {
     let res = (6.112 * Math.pow(Math.E, (17.67 * temp) / (temp + 243.5)) * rel_hum * 2.1674) / (273.15 + temp);
     console.log("abs hum of " + temp + "/" + rel_hum + " => " + res);
+    return res;
 }
 
 function update(relais) {
