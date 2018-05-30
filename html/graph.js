@@ -133,10 +133,10 @@ app.controller('myCtrl', function($scope, $http) {
                         var toff = d.format('dd.mm. HH:MM');
                         if (ton != "") {
                           if (toff.substring(0, 5) == ton.substring(0, 5)) {
-                            $scope.relais[i].switching = ton + " - " + d.format('HH:MM');
+                            $scope.relais[i].switching = ton + " " + d.format('HH:MM');
                           } 
                           else {
-                            $scope.relais[i].switching = ton + " - " + toff;
+                            $scope.relais[i].switching = ton + " " + toff;
                           }
                         }
                         else {
