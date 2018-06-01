@@ -59,20 +59,32 @@ exports.sensors = function(req, res) {
     var data = {};
     var temps;
     db.get("SELECT * FROM temp ORDER BY date DESC LIMIT 1", function(err, row) {
-        data.humidity = row.h0;
-        data.humidity_out = row.internet_h;
         temps = [row.t0, row.t1, row.t2, row.t3, row.t4, row.t5, row.cput, row.h0, row.internet_t, row.internet_h];
 
         data.temperatures = [];
         for (let i = 0; i < setup.sensors.length; ++i) {
             var temp = {};
             temp.name = setup.sensors[i].name;
-            temp.value = Math.round(temps[i] * 100) / 100.0;
+            temp.value = round2(temps[i]);
             temp.unit = setup.sensors[i].unit;
             data.temperatures.push(temp)
         }
+        data.temperatures.push({
+          name: "Abs hum out",
+          value: round2(checkrelaisstate.absolute_humidity(row.internet_t, row.internet_h)),
+          unit: "g/m³"
+        });
+        data.temperatures.push({
+          name: "Abs hum in",
+          value: round2(checkrelaisstate.absolute_humidity(row.t0, row.h0)),
+          unit: "g/m³"
+        });
         res.json(data);
     });
+}
+
+function round2(x) {
+  return Math.round(x * 100.0) / 100.0;
 }
 
 function f(s) {

@@ -38,7 +38,7 @@
   },
   {
     "name": "Lüfter",
-    "on": false,
+    "on": true,
     "switching": "",
     "gpio": 16,
     "turnon": "",

@@ -45,6 +45,8 @@ function absolute_humidity(temp, rel_hum) {
     return res;
 }
 
+exports.absolute_humidity = absolute_humidity;
+
 function update(relais) {
     let db = new sqlite3.Database('temp.sql', errfct);
     db.get("SELECT date, t0, h0, internet_t, internet_h FROM temp WHERE h0 IS NOT NULL AND t0 IS NOT NULL AND" +

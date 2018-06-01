@@ -81,23 +81,23 @@ app.controller('myCtrl', function($scope, $http) {
             }
         }
         seriesNew.push({
-          name: "Hum in",
-          yAxis: 1,
-          data: $scope.showAbs ? series[7].avg : series[7].data
+            name: "Hum in",
+            yAxis: 1,
+            data: $scope.showAbs ? series[7].avg : series[7].data
         });
 
         seriesNew.push({
-          name: "Temp Out",
-          yAxis: 0,
-          data: $scope.showAbs ? series[8].avg : series[8].data
+            name: "Temp Out",
+            yAxis: 0,
+            data: $scope.showAbs ? series[8].avg : series[8].data
         });
-        
+
         seriesNew.push({
-          name: "Hum out",
-          yAxis: 1,
-          data: $scope.showAbs ? series[9].avg : series[9].data
+            name: "Hum out",
+            yAxis: 1,
+            data: $scope.showAbs ? series[9].avg : series[9].data
         });
-        
+
         for (x in $scope.relais) {
             if ($scope.relais[x].shown) {
                 seriesNew.push({
@@ -132,22 +132,19 @@ app.controller('myCtrl', function($scope, $http) {
                         let d = new Date($scope.relais[i].turnoff);
                         var toff = d.format('dd.mm. HH:MM');
                         if (ton != "") {
-                          if (toff.substring(0, 5) == ton.substring(0, 5)) {
-                            $scope.relais[i].switching = ton + " " + d.format('HH:MM');
-                          } 
-                          else {
-                            $scope.relais[i].switching = ton + " " + toff;
-                          }
+                            if (toff.substring(0, 5) == ton.substring(0, 5)) {
+                                $scope.relais[i].switching = ton + " " + d.format('HH:MM');
+                            } else {
+                                $scope.relais[i].switching = ton + " " + toff;
+                            }
+                        } else {
+                            $scope.relais[i].switching = toff;
                         }
-                        else {
-                          $scope.relais[i].switching = toff;
-                        }
-                    }
-                    else {
-                      $scope.relais[i].switching = ton;
+                    } else {
+                        $scope.relais[i].switching = ton;
                     }
                     if ($scope.relais[i].switching.startsWith(new Date().format('dd.mm. '))) {
-                      $scope.relais[i].switching = $scope.relais[i].switching.substring(7);
+                        $scope.relais[i].switching = $scope.relais[i].switching.substring(7);
                     }
                 }
             }, function(err) {
@@ -185,7 +182,7 @@ app.controller('myCtrl', function($scope, $http) {
         var turnon = new Date();
         turnon.setUTCHours(18, 55, 0, 0);
         if (turnon < now) {
-          turnon.setUTCHours(turnon.getHours() + 24);
+            turnon.setUTCHours(turnon.getHours() + 24);
         }
         var turnoff = new Date(turnon.getTime());
         turnoff.setUTCHours(turnoff.getUTCHours() + 3);
@@ -211,20 +208,20 @@ app.controller('myCtrl', function($scope, $http) {
         var now = new Date();
         var from;
         switch (range[1]) {
-          case 'm':
-            from = now - 24 * 3600 * 1000 * 31 * n;
-            break;
-          case 'w':
-            from = now - 24 * 3600 * 1000 * 7 * n;
-            break;
-          case 'd':
-            from = now - 24 * 3600 * 1000 * n;
-            break;
-          case 'r':
-            myChart.xAxis[0].setExtremes(null, null);
-            return;
+            case 'm':
+                from = now - 24 * 3600 * 1000 * 31 * n;
+                break;
+            case 'w':
+                from = now - 24 * 3600 * 1000 * 7 * n;
+                break;
+            case 'd':
+                from = now - 24 * 3600 * 1000 * n;
+                break;
+            case 'r':
+                myChart.xAxis[0].setExtremes(null, null);
+                return;
         }
-        
+
         myChart.xAxis[0].setExtremes(from, now);
     }
     $scope.toggleAbsDiff = function() {
@@ -243,6 +240,9 @@ app.controller('myCtrl', function($scope, $http) {
             $scope.sensors = response.data;
         });
 
+    if (CHARTS == "disabled") {
+        return;
+    }
     //indexedDB.deleteDatabase('sensors');
     var request = indexedDB.open('sensors', 4);
     request.onupgradeneeded = function(event) {
@@ -463,31 +463,32 @@ app.controller('myCtrl', function($scope, $http) {
                 type: 'datetime'
             },
             yAxis: [{
-                labels: {
-                    format: '{value}°C'
+                    labels: {
+                        format: '{value}°C'
+                    },
+                    title: {
+                        text: 'Temperature'
+                    },
+                }, {
+                    opposite: true,
+                    ceiling: 100,
+                    floor: 0,
+                    labels: {
+                        format: '{value}%'
+                    },
+                    title: {
+                        text: 'Humidity'
+                    }
                 },
-                title: {
-                    text: 'Temperature'
-                },
-            }, {
-                opposite: true,
-                ceiling: 100,
-                floor: 0,
-                labels: {
-                    format: '{value}%'
-                },
-                title: {
-                    text: 'Humidity'
+
+                {
+                    ceiling: 1,
+                    opposite: true,
+                    title: {
+                        text: ''
+                    }
                 }
-            },
-            
-            {
-                ceiling: 1,
-                opposite: true,
-                title: {
-                    text: ''
-                }
-            }],
+            ],
             legend: {
                 enabled: true
             },
