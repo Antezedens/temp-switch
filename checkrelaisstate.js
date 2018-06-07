@@ -60,13 +60,19 @@ function update(relais) {
 
             var abs_h_in = absolute_humidity(t_in, h_in);
             var abs_h_out = absolute_humidity(t_out, h_out);
-            if (abs_h_in > abs_h_out + 3.5 && h_in >= 93) {
+            if (abs_h_in < abs_h_out + 3.5) {
+              if (relais[5].on == true) {
+                  relais[5].on = false;
+                  exports.writeRelais(relais);
+              }
+            }
+            else if (h_in >= 92) {
               console.log("fan should be running");
                 if (relais[5].on == false) {
                     relais[5].on = true;
                     exports.writeRelais(relais);
                 }
-            } else {
+            } else if (h_in <= 89){
               console.log("fan should not be running");
                 if (relais[5].on == true) {
                     relais[5].on = false;
