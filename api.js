@@ -126,7 +126,9 @@ exports.temperatures = function(req, res) {
             return;
         }
 
-        if (lastvalues[i] != value) {
+        if (lastvalues[i] != value 
+          && value > -50 // ignore impossible values!
+        ) { 
             var doit = true;
 
             if (Math.abs(lastvalues[i] - value) < delta) {
