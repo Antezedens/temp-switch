@@ -38,17 +38,17 @@ parsetemp.getinternet((temp, humid) => {
 		fs.unlinkSync(laterfile);
 	} catch(e) {		
 	}
+	addtemp(postdata, ts, humid, 100);
+	addtemp(postdata, ts, dht22['humidity'], 101);
 	addtemp(postdata, ts, temp, 0);
-	addtemp(postdata, ts, humid, 1);
-	addtemp(postdata, ts, dht22['humidity'], 2);
-	addtemp(postdata, ts, dht22['temp'],3);
-	addtemp(postdata, ts, cput, 4);
+	addtemp(postdata, ts, dht22['temp'],1);
+	addtemp(postdata, ts, cput, 2);
 
-	addtemp(postdata, ts, v[0], 5);
-	addtemp(postdata, ts, v[1], 6);
-	addtemp(postdata, ts, v[2], 7);
-	addtemp(postdata, ts, v[3], 8);
-	addtemp(postdata, ts, v[4], 9);
+	addtemp(postdata, ts, v[0], 3);
+	addtemp(postdata, ts, v[1], 4);
+	addtemp(postdata, ts, v[2], 5);
+	addtemp(postdata, ts, v[3], 6);
+	addtemp(postdata, ts, v[4], 7);
 	
 	console.log(postdata);
 	//request({url: 'http://fuchsbau.cu.ma/sensor.php', method: "POST", json: false, body: "data=" + postdata}, function (error, response, body) {
