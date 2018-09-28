@@ -78,11 +78,11 @@ function formatKh(kh) {
     if (!kh) {
         return "";
     }
-    return Math.round(kh*10/12)/10;
+    return Math.round(kh * 10 / 12) / 10;
 }
 
-function logDay(date, data) {
-    console.log("<h3>" + date + "</h3>");
+function logDay(date, data, notes) {
+    console.log("<div><h3>" + date + "</h3>");
     console.log("<table border><tr><th></th>");
     data.forEach(elem => {
         console.log("<th>" + elem.hour + "</th>");
@@ -107,12 +107,26 @@ function logDay(date, data) {
     data.forEach(elem => {
         console.log("<td>" + formatIe(elem.bolus_ie) + "</td>");
     });
-    console.log("</tr></table>");
+    console.log("<tr><td colspan=" + (data.length + 1) + "><table>");
+    notes.forEach(elem => {
+        console.log("<tr><td>" + elem.at + "</td><td>" + elem.text + "</td></tr>");
+    });
+    console.log("</table></tr></table></div>");
 }
 
-console.log("<html><body>");
+console.log('<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">\
+<title>Test</title>\
+<style type="text/css">\
+  div { page-break-inside:avoid; }\
+  table { page-break-inside:avoid; }\
+  tr    { page-break-inside:avoid; page-break-after:auto }\
+  thead { display:table-header-group }\
+  tfoot { display:table-footer-group }\
+</style>\
+</head><body>');
 
 var day_data = [];
+var notes = [];
 
 var lastday = 0;
 var lastdate = "";
@@ -132,25 +146,34 @@ lines.forEach(line => {
                 kh_unspec: data[8],
                 kh: parseKh(data[9]),
                 basal_ie_unspec: data[11],
-                basal_ie: parseIe(data[12])
+                basal_ie: parseIe(data[12]),
+                note: data[13]
             }
             let currentdate = dateformat(entry.date, "ddd dd.mm.yyyy HH:MM");
             let currentday = currentdate.substring(0, 14);
             let currenthour = parseInt(currentdate.substring(15, 17));
             if (currentday != lastday) {
                 if (lastday != 0) {
-                    logDay(lastday, day_data);
+                    logDay(lastday, day_data, notes);
                 }
 
                 day_data = [];
+                notes = [];
                 lastday = currentday;
                 lasthour = "invalid";
             }
 
+            if (entry.note) {
+                notes.push({
+                    at: currentdate.substring(15, 20),
+                    text: entry.note
+                });
+            }
+
             if (lasthour != currenthour) {
+                lasthour = currenthour;
                 if (entry.gluc > 0) {
                     middle = Math.floor(entry.date / perhour) * perhour;
-                    lasthour = currenthour;
                     middle_gluc = Math.round(lastentry.gluc + (entry.gluc - lastentry.gluc) / (entry.date - lastentry.date) * (middle - lastentry.date));
                 } else {
                     middle_gluc = -1;
@@ -168,7 +191,7 @@ lines.forEach(line => {
                     kh: entry.kh
                 };
             } else {
-                if (day_data[currenthour].gluc < 0) {
+                if (day_data[currenthour].gluc < 0 && entry.gluc > 0) {
                     middle = Math.floor(entry.date / perhour) * perhour;
                     lasthour = currenthour;
                     day_data[currenthour].gluc = Math.round(lastentry.gluc + (entry.gluc - lastentry.gluc) / (entry.date - lastentry.date) * (middle - lastentry.date));
@@ -189,6 +212,6 @@ lines.forEach(line => {
     }
 });
 
-logDay(lastday, day_data);
+logDay(lastday, day_data, notes);
 
 console.log("</table></body></html>");
