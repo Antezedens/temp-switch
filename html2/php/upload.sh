@@ -9,6 +9,9 @@ quote PASS $PASSWD
 cd public_html
 put setupsql.php
 put sensor.php
+put db.php
+put current.php
+put index.html
 quit
 END_SCRIPT
 exit 0
