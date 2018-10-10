@@ -23,7 +23,7 @@ try {
 	cput = "null";
 }
 
-function datapush(data, ts, value) {
+function datapush(data, id, ts, value) {
 	data.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, value]);
 }
 
