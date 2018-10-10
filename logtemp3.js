@@ -7,7 +7,7 @@ var dateformat = require('dateformat');
 var dht22 = parsetemp.getDHT22(6);
 
 try {
-	cput = parseInt(fs.readFileSync('/sys/devices/virtual/thermal/thermal_zone0/temp'));
+	cput = parseInt(fs.readFileSync('/sys/devices/virtual/thermal/thermal_zone0/temp')) / 1000.0;
 } catch (e) {
 	cput = "null";
 }
