@@ -88,7 +88,6 @@ try {
 addtemp(postdata, ts, dht22['humidity'], 108, 0.15, transdata);
 addtemp(postdata, ts, dht22['temp'],8, 0.15, transdata);
 addtemp(postdata, ts, cput, 9, 1.5, transdata);
-transdata);
 	
 transdata.lastts = ts;
 fs.writeFileSync(transfile, JSON.stringify(transdata));
