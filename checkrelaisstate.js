@@ -48,60 +48,54 @@ function absolute_humidity(temp, rel_hum) {
 exports.absolute_humidity = absolute_humidity;
 
 function update(relais) {
-    let db = new sqlite3.Database('temp.sql', errfct);
-    db.get("SELECT date, t0, h0, internet_t, internet_h FROM temp WHERE h0 IS NOT NULL AND t0 IS NOT NULL AND" +
-        " internet_h IS NOT NULL AND internet_t IS NOT NULL" +
-        " ORDER BY date DESC LIMIT 1",
-        function(err, row) {
-            var t_in = row.t0;
-            var t_out = row.internet_t;
-            var h_in = row.h0;
-            var h_out = row.internet_h;
+    temp = jf.readFileSync('/tmp/temperature.json');
+    var t_in = temp.in.temp;
+    var t_out = temp.out.temp;
+    var h_in = temp.in.humidity;
+    var h_out = temp.out.humidity;
 
-            var abs_h_in = absolute_humidity(t_in, h_in);
-            var abs_h_out = absolute_humidity(t_out, h_out);
-            if (abs_h_in < abs_h_out + 3.5) {
-              if (relais[5].on == true) {
-                  relais[5].on = false;
-                  exports.writeRelais(relais);
-              }
-            }
-            else if (h_in >= 92) {
-              console.log("fan should be running");
-                if (relais[5].on == false) {
-                    relais[5].on = true;
-                    exports.writeRelais(relais);
-                }
-            } else if (h_in <= 89){
-              console.log("fan should not be running");
-                if (relais[5].on == true) {
-                    relais[5].on = false;
-                    exports.writeRelais(relais);
-                }
-            }
+    var abs_h_in = absolute_humidity(t_in, h_in);
+    var abs_h_out = absolute_humidity(t_out, h_out);
+    if (abs_h_in < abs_h_out + 3.5) {
+      if (relais[5].on == true) {
+          relais[5].on = false;
+          exports.writeRelais(relais);
+      }
+    }
+    else if (h_in >= 92) {
+      console.log("fan should be running");
+        if (relais[5].on == false) {
+            relais[5].on = true;
+            exports.writeRelais(relais);
+        }
+    } else if (h_in <= 89){
+      console.log("fan should not be running");
+        if (relais[5].on == true) {
+            relais[5].on = false;
+            exports.writeRelais(relais);
+        }
+    }
 
-            console.log("update: " + relais);
-            for (let i = 0; i < relais.length; ++i) {
-                let turnon = relais[i].turnon;
-                let turnoff = relais[i].turnoff;
-                console.log("turnon/off " + turnon + "/" + turnoff);
-                if (turnon != "" && new Date(turnon) <= new Date()) {
-                    console.log("time to turnon! " + relais[i].gpio);
-                    relais[i].on = true;
-                    relais[i].turnon = "";
-                    exports.writeRelais(relais);
-                }
-                if (turnoff != "" && new Date(turnoff) <= new Date()) {
-                    console.log("time to turnoff! " + relais[i].gpio);
-                    relais[i].on = false;
-                    relais[i].turnoff = "";
-                    exports.writeRelais(relais);
-                }
+    console.log("update: " + relais);
+    for (let i = 0; i < relais.length; ++i) {
+        let turnon = relais[i].turnon;
+        let turnoff = relais[i].turnoff;
+        console.log("turnon/off " + turnon + "/" + turnoff);
+        if (turnon != "" && new Date(turnon) <= new Date()) {
+            console.log("time to turnon! " + relais[i].gpio);
+            relais[i].on = true;
+            relais[i].turnon = "";
+            exports.writeRelais(relais);
+        }
+        if (turnoff != "" && new Date(turnoff) <= new Date()) {
+            console.log("time to turnoff! " + relais[i].gpio);
+            relais[i].on = false;
+            relais[i].turnoff = "";
+            exports.writeRelais(relais);
+        }
 
-                gpioState(relais[i].gpio, relais[i].on);
-            }
-        });
-
+        gpioState(relais[i].gpio, relais[i].on);
+    }
 }
 
 exports.readRelais = function() {
