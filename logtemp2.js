@@ -3,6 +3,7 @@ var setup = require('./setup');
 var fs = require('fs');
 var request = require('request');
 var dateformat = require('dateformat');
+var jf = require('jsonfile');
 
 w1_sensors = []
 for (let i=0; i<setup.sensors.length; ++i) {
@@ -79,6 +80,7 @@ function addtemp(data, ts, value, id, delta, transdata) {
 
 const laterfile = '/tmp/sensors.later';
 const transfile = '/tmp/transition.json';
+const internet = '/tmp/internet.json';
 parsetemp.getinternet((temp, humid) => {
 
 	var transdata = {
@@ -96,6 +98,8 @@ parsetemp.getinternet((temp, humid) => {
 		fs.unlinkSync(laterfile);
 	} catch(e) {		
 	}
+	
+	jf.writeFileSync(internet, { humid: humid, temp: temp});
 
 	addtemp(postdata, ts, humid, 100, 1.5, transdata);
 	addtemp(postdata, ts, dht22['humidity'], 101, 0.15, transdata);
