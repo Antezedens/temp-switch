@@ -53,7 +53,6 @@ exports.setRelais = function(req, res) {
 
 exports.setRelaisOnNode = function(req, res) {
     var body = req.body;
-    var id = body.id;
     console.log(req.query);
     
 
@@ -68,7 +67,7 @@ exports.setRelaisOnNode = function(req, res) {
     request.post(host + '/relais', { json: postdata}, function (error, response, body) {
 			if (error) {
 				console.log("error: " + error);        
-        res.write(error);
+        res.write("error: " + error);
         res.status(500).send();
 			} else {
 			  console.log(response);
