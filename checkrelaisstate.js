@@ -1,7 +1,10 @@
-const relaisFile = './relais.json';
 var jf = require('jsonfile');
 var fs = require('fs');
-var sqlite3 = require('sqlite3').verbose();
+var request = require('request');
+var dateformat = require('dateformat');
+
+var node = fs.readFileSync('node.txt').toString().trim();
+var relaisFile = './relais' + node + '.json'
 const gpioBasePath = "/sys/class/gpio/"
 let errfct = function($err) {
     if ($err) {
@@ -9,7 +12,7 @@ let errfct = function($err) {
     }
 }
 
-function gpioState(pin, state) {
+function gpioState(postdata, ts, id, pin, state) {
     if (process.env.USER != "fuchs") {
 
         let valuePath = gpioBasePath + "gpio" + pin + "/value";
@@ -26,16 +29,10 @@ function gpioState(pin, state) {
         if (fs.readFileSync(valuePath).toString() != value) {
             console.log("updated value of " + pin);
             fs.writeFileSync(valuePath, value);
-            let db = new sqlite3.Database('relais.sql', errfct);
-            let query = 'INSERT INTO relais (gpio, state) VALUES (' + pin + ', ' + (state ? 1 : 0) + ')';
-            db.run(query, errfct);
-            db.close();
+            postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0)]);
         }
     } else {
-        let db = new sqlite3.Database('relais.sql', errfct);
-        let query = 'INSERT INTO relais (gpio, state) VALUES (' + pin + ', ' + (state ? 1 : 0) + ')';
-        db.run(query, errfct);
-        db.close();
+      postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0)]);
     }
 }
 
@@ -47,7 +44,19 @@ function absolute_humidity(temp, rel_hum) {
 
 exports.absolute_humidity = absolute_humidity;
 
+
+const laterfile = '/tmp/relais.later';
+	
 function update(relais) {
+    var ts = Date.now();
+    var postdata = [];
+    var updateRelaisFile = false;
+    try {
+    	postdata = JSON.parse(fs.readFileSync(laterfile));
+    	fs.unlinkSync(laterfile);
+    } catch(e) {		
+    }
+  
     temp = jf.readFileSync('/tmp/temperature.json');
     var t_in = temp.in.temp;
     var t_out = temp.out.temp;
@@ -59,20 +68,20 @@ function update(relais) {
     if (abs_h_in < abs_h_out + 3.5) {
       if (relais[5].on == true) {
           relais[5].on = false;
-          exports.writeRelais(relais);
+          updateRelaisFile = true;
       }
     }
     else if (h_in >= 92) {
       console.log("fan should be running");
         if (relais[5].on == false) {
             relais[5].on = true;
-            exports.writeRelais(relais);
+            updateRelaisFile = true;
         }
     } else if (h_in <= 89){
       console.log("fan should not be running");
         if (relais[5].on == true) {
             relais[5].on = false;
-            exports.writeRelais(relais);
+            updateRelaisFile = true;
         }
     }
 
@@ -85,24 +94,42 @@ function update(relais) {
             console.log("time to turnon! " + relais[i].gpio);
             relais[i].on = true;
             relais[i].turnon = "";
-            exports.writeRelais(relais);
+            updateRelaisFile = true;
         }
         if (turnoff != "" && new Date(turnoff) <= new Date()) {
             console.log("time to turnoff! " + relais[i].gpio);
             relais[i].on = false;
             relais[i].turnoff = "";
-            exports.writeRelais(relais);
+            updateRelaisFile = true;
         }
 
-        gpioState(relais[i].gpio, relais[i].on);
+        gpioState(postdata, ts, relais[i].id + 200, relais[i].gpio, relais[i].on);
     }
+    
+    if (updateRelaisFile) {
+      doWriteRelais(relais, false);
+    }
+    
+    if (postdata.length > 0) {
+      console.log("post: " + postdata);
+      //request({url: 'http://fuchsbau.cu.ma/sensor.php', method: "POST", json: false, body: "data=" + postdata}, function (error, response, body) {
+      request.post('http://fuchsbau.cu.ma/sensor.php', { json: postdata}, function (error, response, body) {
+        if (error) {
+          console.log("error: " + error);
+          fs.writeFileSync(laterfile, JSON.stringify(postdata));
+        } else {
+          console.log(response);
+        }
+      });
+    }
+
 }
 
 exports.readRelais = function() {
     return jf.readFileSync(relaisFile);
 }
 
-exports.writeRelais = function(relais) {
+function doWriteRelais(relais, doUpdate) {
     jf.writeFile(relaisFile, relais, {
         spaces: 2,
         EOL: '\n'
@@ -110,9 +137,15 @@ exports.writeRelais = function(relais) {
         if (err) {
             console.log(err);
         } else {
+          if (doUpdate) {
             update(relais);
+          }
         }
     });
+}
+
+exports.writeRelais = function(relais) {
+  doWriteRelais(relais, true);
 }
 
 exports.check = function() {

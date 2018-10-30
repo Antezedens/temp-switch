@@ -134,18 +134,18 @@ td {
 <td>{{ x.name }}</td>
 <td>
   <label class="switch">
-  <input type="checkbox" ng-model="x.checked" ng-change="setRelais(x.name, x.checked)">
+  <input type="checkbox" ng-model="x.checked" ng-change="setRelais(x.id, x.checked)">
   <span class="slider"></span>
 </label>
 </td>
 <!--<td width = '40px' ng-mouseover="open = true" ng-mouseleave="open = false"> -->
 <td>
- <button class="button button1" type="button" ng-show="x.switching != 'xxx'" ng-click="setRelais24(x.name)"  >
+ <button class="button button1" type="button" ng-show="x.switching != 'xxx'" ng-click="setRelais24(x.id)"  >
         24
  </button>
 </td>
 <td>
-  <button class="button button1" type="button" ng-show="x.switching != 'xxx'" ng-click="setRelaisExtraTime(x.name)"  >
+  <button class="button button1" type="button" ng-show="x.switching != 'xxx'" ng-click="setRelaisExtraTime(x.id)"  >
          +
   </button>
 </td>

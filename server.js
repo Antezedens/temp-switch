@@ -12,14 +12,11 @@ app.use(bodyParser.json());
 // JSON API
 app.use(express.static('html'));
 app.get('/relais', api.relais);
-app.get('/relaisHistory', api.relaisHistory);
-app.get('/sensors', api.sensors);
-app.get('/temperatures', api.temperatures);
 app.post('/relais', api.setRelais);
-app.get('/temp.sql.bz2', api.temp_sql_bz2);
 app.get('/pull', api.pull);
 app.get('/status', api.status);
 app.get('/restart', api.restart);
+app.get('/setRelaisOnNode', api.setRelaisOnNode);
 //app.put('/switches/:id', api.editSwitch);
 //app.delete('/switches/:id', api.deleteSwitch);
 
