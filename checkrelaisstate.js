@@ -48,6 +48,9 @@ exports.absolute_humidity = absolute_humidity;
 const laterfile = '/tmp/relais.later';
 	
 function update(relais) {
+  if (node == '1') {
+    return
+  }
     var ts = Date.now();
     var postdata = [];
     var updateRelaisFile = false;
@@ -57,32 +60,34 @@ function update(relais) {
     } catch(e) {		
     }
   
-    temp = jf.readFileSync('/tmp/temperature.json');
-    var t_in = temp.in.temp;
-    var t_out = temp.out.temp;
-    var h_in = temp.in.humidity;
-    var h_out = temp.out.humidity;
+    if (node == '10') {
+      temp = jf.readFileSync('/tmp/temperature.json');
+      var t_in = temp.in.temp;
+      var t_out = temp.out.temp;
+      var h_in = temp.in.humidity;
+      var h_out = temp.out.humidity;
 
-    var abs_h_in = absolute_humidity(t_in, h_in);
-    var abs_h_out = absolute_humidity(t_out, h_out);
-    if (abs_h_in < abs_h_out + 3.5) {
-      if (relais[5].on == true) {
-          relais[5].on = false;
-          updateRelaisFile = true;
-      }
-    }
-    else if (h_in >= 92) {
-      console.log("fan should be running");
-        if (relais[5].on == false) {
-            relais[5].on = true;
-            updateRelaisFile = true;
-        }
-    } else if (h_in <= 89){
-      console.log("fan should not be running");
+      var abs_h_in = absolute_humidity(t_in, h_in);
+      var abs_h_out = absolute_humidity(t_out, h_out);
+      if (abs_h_in < abs_h_out + 3.5) {
         if (relais[5].on == true) {
             relais[5].on = false;
             updateRelaisFile = true;
         }
+      }
+      else if (h_in >= 92) {
+        console.log("fan should be running");
+          if (relais[5].on == false) {
+              relais[5].on = true;
+              updateRelaisFile = true;
+          }
+      } else if (h_in <= 89){
+        console.log("fan should not be running");
+          if (relais[5].on == true) {
+              relais[5].on = false;
+              updateRelaisFile = true;
+          }
+      }
     }
 
     console.log("update: " + relais);
