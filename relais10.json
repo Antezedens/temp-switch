@@ -1,0 +1,63 @@
+[
+  {
+    "id": 50,
+    "on": false,
+    "gpio": 198,
+    "turnon": "",
+    "turnoff": ""
+  },
+  {
+    "id": 51,
+    "on": false,
+    "gpio": 199,
+    "excludes": 7,
+    "turnon": "",
+    "turnoff": ""
+  },
+  {
+    "id": 52,
+    "on": false,
+    "gpio": 7,
+    "excludes": 199,
+    "turnon": "",
+    "turnoff": ""
+  },
+  {
+    "id": 53,
+    "on": false,
+    "gpio": 19,
+    "turnon": "",
+    "turnoff": ""
+  },
+  {
+    "id": 54,
+    "on": true,
+    "gpio": 14,
+    "turnon": "",
+    "turnoff": ""
+  },
+  {
+    "id": 55,
+    "on": false,
+    "switching": "",
+    "gpio": 16,
+    "turnon": "",
+    "turnoff": ""
+  },
+  {
+    "id": 56,
+    "on": false,
+    "switching": "",
+    "gpio": 15,
+    "turnon": "",
+    "turnoff": ""
+  },
+  {
+    "id": 57,
+    "on": false,
+    "switching": "",
+    "gpio": 3,
+    "turnon": "",
+    "turnoff": ""
+  }
+]

@@ -1,13 +1,13 @@
 [
   {
-    "name": "r1",
+    "id": 58,
     "on": false,
     "gpio": 198,
     "turnon": "",
     "turnoff": ""
   },
   {
-    "name": "r2",
+    "id": 59,
     "on": false,
     "gpio": 199,
     "excludes": 7,
@@ -15,7 +15,7 @@
     "turnoff": ""
   },
   {
-    "name": "r3",
+    "id": 60,
     "on": false,
     "gpio": 7,
     "excludes": 199,
@@ -23,40 +23,40 @@
     "turnoff": ""
   },
   {
-    "name": "r4",
+    "id": 61,
     "on": false,
     "gpio": 19,
     "turnon": "",
     "turnoff": ""
   },
   {
-    "name": "Immer",
-    "on": true,
-    "gpio": 14,
+    "id": 62,
+    "on": false,
+    "gpio": 18,
     "turnon": "",
     "turnoff": ""
   },
   {
-    "name": "Lüfter",
-    "on": true,
-    "switching": "",
-    "gpio": 16,
-    "turnon": "",
-    "turnoff": ""
-  },
-  {
-    "name": "Pumpe an",
+    "id": 63,
     "on": false,
     "switching": "",
-    "gpio": 15,
+    "gpio": 2,
     "turnon": "",
     "turnoff": ""
   },
   {
-    "name": "Pumpe aus",
+    "id": 64,
     "on": false,
     "switching": "",
-    "gpio": 3,
+    "gpio": 13,
+    "turnon": "",
+    "turnoff": ""
+  },
+  {
+    "id": 65,
+    "on": false,
+    "switching": "",
+    "gpio": 10,
     "turnon": "",
     "turnoff": ""
   }

@@ -80,7 +80,7 @@ function addtemp(data, ts, value, id, delta, transdata) {
 
 const laterfile = '/tmp/sensors.later';
 const transfile = '/tmp/transition.json';
-const internet = '/tmp/internet.json';
+const internet = '/tmp/temperature.json';
 parsetemp.getinternet((temp, humid) => {
 
 	var transdata = {
@@ -99,7 +99,13 @@ parsetemp.getinternet((temp, humid) => {
 	} catch(e) {		
 	}
 	
-	jf.writeFileSync(internet, { humid: humid, temp: temp});
+	jf.writeFileSync(internet, { 
+		out: {
+			humidity: humid, 
+			temp: temp
+		},
+		in: dht22
+	});
 
 	addtemp(postdata, ts, humid, 100, 1.5, transdata);
 	addtemp(postdata, ts, dht22['humidity'], 101, 0.15, transdata);
@@ -117,6 +123,7 @@ parsetemp.getinternet((temp, humid) => {
 	fs.writeFileSync(transfile, JSON.stringify(transdata));
 
 	console.log(postdata);
+	require('./checkrelaisstate').check();
 	
 	if (postdata.length > 0) {
 		//request({url: 'http://fuchsbau.cu.ma/sensor.php', method: "POST", json: false, body: "data=" + postdata}, function (error, response, body) {
@@ -131,5 +138,4 @@ parsetemp.getinternet((temp, humid) => {
 	}
 });
 
-require('./checkrelaisstate').check();
 // /sys/devices/virtual/thermal/thermal_zone0/temp
