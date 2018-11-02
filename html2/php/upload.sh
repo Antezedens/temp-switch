@@ -9,6 +9,7 @@ quote PASS $PASSWD
 cd public_html
 put setupsql.php
 put sensor.php
+put history.php
 put db.php
 put relais.php
 put current.php
