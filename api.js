@@ -65,7 +65,11 @@ exports.setRelaisOnNode = function(req, res) {
     if (process.env.USER == "fuchs") {
       host = "http://localhost:8000"
     }
-    postdata = { id: req.query.id, state: req.query.value}
+    var state = req.query.value;
+    if ('auto' in req.query) {
+	    state = req.query.auto;
+    }
+    postdata = { id: req.query.id, state: state}
 
     request.post(host + '/relais', { json: postdata}, function (error, response, body) {
 			if (error) {
