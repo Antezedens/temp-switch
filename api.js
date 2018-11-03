@@ -21,7 +21,7 @@ exports.relais = function(req, res) {
 exports.setRelais = function(req, res) {
     var body = req.body;
     var id = body.id;
-    console.log("Id: " + id + " : " + body);
+    console.log("Id: " + id + " : " + body + " -> " + body.state);
 
     relais = checkrelaisstate.readRelais();
     var force = -1;
@@ -65,7 +65,7 @@ exports.setRelaisOnNode = function(req, res) {
     if (process.env.USER == "fuchs") {
       host = "http://localhost:8000"
     }
-    postdata = { id: req.query.id, state: req.query.value == '1'}
+    postdata = { id: req.query.id, state: req.query.value}
 
     request.post(host + '/relais', { json: postdata}, function (error, response, body) {
 			if (error) {
