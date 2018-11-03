@@ -24,10 +24,13 @@ exports.setRelais = function(req, res) {
     console.log("Id: " + id + " : " + body);
 
     relais = checkrelaisstate.readRelais();
+    var force = -1;
     for (let i = 0; i < relais.length; ++i) {
         if (relais[i].id == id) {
             if ('state' in body) {
-                relais[i].on = body.state;
+		force = i;
+                relais[i].on = (body.state & 1) == 1;
+		relais[i].auto = (body.state & 2) == 2;
                 if (body.state && 'excludes' in relais[i]) {
                     let excludes = relais[i].excludes;
                     for (let j = 0; j < relais.length; ++j) {
@@ -47,7 +50,7 @@ exports.setRelais = function(req, res) {
             }
         }
     }
-    checkrelaisstate.writeRelais(relais);
+    checkrelaisstate.writeRelais(relais, force);
     res.status(200).send();
 };
 
