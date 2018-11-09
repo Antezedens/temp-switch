@@ -7,6 +7,16 @@ $id = $_GET['id'];
 $unit_v = $_GET['unit'];
 $unit2_v = $_GET['unit2'];
 
+$conn->query("SET time_zone = '+0:00';");
+
+function printrow($first, $ts, $dat1, $dat2) {
+  if (!$first) {
+    echo(",");
+  }
+  echo "[$ts,$dat1,$dat2]";
+  return FALSE;
+}
+
 if (!$unit2_v) {
   $unit = $unit_v;
   $qu = "select unix_timestamp(tstamp)*1000 as ts, value from sensors where id='" . $id . "' and unit='$unit'";
@@ -31,20 +41,27 @@ if (!$unit2_v) {
   }
   echo("[");
   $first = TRUE;
+  $lastvalue = NULL;
+  $lastvalue2 = NULL;
+  $lastitem = -1;
+  
+  $lastrow = NULL;
   while($r = $result->fetch_row()) {
     //echo "$r[0] $r[1] $r[2] [[[$lastts] --> $lastvalue]]<br>";
     //echo ($r[2] == $id2) . " && " . ($r[0] == $lastts) . "<br>";
     if ($r[2] == $unit) {
-      $lastts = $r[0];
-      $lastvalue =  $r[1];  
-    } else if ($r[2] == $unit2 && $r[0] == $lastts) {
-      $r[2] = $lastvalue;
-      if ($first) {
-        $first = FALSE;
-      } else {
-        echo(",");
+      if (!is_null($lastvalue2) && !is_null($lastrow)) {
+        $first = printrow($first, $lastrow[0], $lastrow[1], $lastvalue2);
       }
-      echo(json_encode($r, JSON_NUMERIC_CHECK));
+      $lastvalue =  $r[1];  
+      $lastitem = 1;
+      $lastrow = $r;
+    } else if ($r[2] == $unit2) {
+      if (!is_null($lastvalue)) {
+        $first = printrow($first, $r[0], $lastvalue, $r[1]);
+      }
+      $lastvalue2 = $r[1];
+      $lastrow = NULL;
     }      
   }
   echo("]");

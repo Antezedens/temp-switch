@@ -21,13 +21,16 @@ exports.relais = function(req, res) {
 exports.setRelais = function(req, res) {
     var body = req.body;
     var id = body.id;
-    console.log("Id: " + id + " : " + body);
+    console.log("Id: " + id + " : " + body + " -> " + body.state);
 
     relais = checkrelaisstate.readRelais();
+    var force = -1;
     for (let i = 0; i < relais.length; ++i) {
         if (relais[i].id == id) {
             if ('state' in body) {
-                relais[i].on = body.state;
+		force = i;
+                relais[i].on = (body.state & 1) == 1;
+		relais[i].auto = (body.state & 2) == 2;
                 if (body.state && 'excludes' in relais[i]) {
                     let excludes = relais[i].excludes;
                     for (let j = 0; j < relais.length; ++j) {
@@ -47,13 +50,12 @@ exports.setRelais = function(req, res) {
             }
         }
     }
-    checkrelaisstate.writeRelais(relais);
+    checkrelaisstate.writeRelais(relais, force);
     res.status(200).send();
 };
 
 exports.setRelaisOnNode = function(req, res) {
     var body = req.body;
-    var id = body.id;
     console.log(req.query);
     
 
@@ -63,12 +65,16 @@ exports.setRelaisOnNode = function(req, res) {
     if (process.env.USER == "fuchs") {
       host = "http://localhost:8000"
     }
-    postdata = { id: req.query.id, state: req.query.value == '1'}
+    var state = req.query.value;
+    if ('auto' in req.query) {
+	    state = req.query.auto;
+    }
+    postdata = { id: req.query.id, state: state}
 
     request.post(host + '/relais', { json: postdata}, function (error, response, body) {
 			if (error) {
 				console.log("error: " + error);        
-        res.write(error);
+        res.write("error: " + error);
         res.status(500).send();
 			} else {
 			  console.log(response);

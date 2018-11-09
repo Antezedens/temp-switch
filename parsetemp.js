@@ -16,7 +16,7 @@ exports.getDHT22 = function(pin) {
             console.log('h/t:' + out['humidity'] + "/" + out['temp']);
             return out;
         } catch (e) {
-            console.log("Failed once...");
+            console.log("Failed once... " + e);
         }
     }
     return {
