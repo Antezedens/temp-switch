@@ -12,7 +12,7 @@ let errfct = function($err) {
     }
 }
 
-function gpioState(postdata, ts, id, pin, state, auto, force) {
+function gpioState(postdata, ts, id, pin, state, auto, force, relais) {
     if (process.env.USER != "fuchs") {
 
         let valuePath = gpioBasePath + "gpio" + pin + "/value";
@@ -29,10 +29,10 @@ function gpioState(postdata, ts, id, pin, state, auto, force) {
         if (fs.readFileSync(valuePath).toString() != value || force) {
             console.log("updated value of " + pin);
             fs.writeFileSync(valuePath, value);
-            postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0) | (auto ? 2 : 0)]);
+            postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0) | (auto ? 2 : 0), relais]);
         }
     } else {
-      postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0)]);
+      postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0), relais]);
     }
 }
 
@@ -108,7 +108,7 @@ function update(relais, force) {
             updateRelaisFile = true;
         }
 
-        gpioState(postdata, ts, relais[i].id + 200, relais[i].gpio, relais[i].on, relais[i].auto, force == i);
+        gpioState(postdata, ts, relais[i].id + 200, relais[i].gpio, relais[i].on, relais[i].auto, force == i, relais);
     }
     
     if (updateRelaisFile) {

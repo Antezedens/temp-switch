@@ -28,9 +28,9 @@ exports.setRelais = function(req, res) {
     for (let i = 0; i < relais.length; ++i) {
         if (relais[i].id == id) {
             if ('state' in body) {
-		force = i;
+		            force = i;
                 relais[i].on = (body.state & 1) == 1;
-		relais[i].auto = (body.state & 2) == 2;
+		            relais[i].auto = (body.state & 2) == 2;
                 if (body.state && 'excludes' in relais[i]) {
                     let excludes = relais[i].excludes;
                     for (let j = 0; j < relais.length; ++j) {
@@ -44,9 +44,11 @@ exports.setRelais = function(req, res) {
             }
             if ('turnon' in body) {
                 relais[i].turnon = body.turnon;
+                force = i;
             }
             if ('turnoff' in body) {
                 relais[i].turnoff = body.turnoff;
+                force = i;
             }
         }
     }
