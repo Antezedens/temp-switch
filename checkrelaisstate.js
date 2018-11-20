@@ -108,7 +108,7 @@ function update(relais, force) {
             updateRelaisFile = true;
         }
 
-        gpioState(postdata, ts, relais[i].id + 200, relais[i].gpio, relais[i].on, relais[i].auto, force == i, relais);
+        gpioState(postdata, ts, relais[i].id + 200, relais[i].gpio, relais[i].on, relais[i].auto, force == i, relais[i]);
     }
     
     if (updateRelaisFile) {
