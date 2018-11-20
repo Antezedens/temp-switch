@@ -58,11 +58,11 @@ exports.setRelaisOnNode = function(req, res) {
 
     res.set('Access-Control-Allow-Origin', '*');
     
-    var host = 'http://10.5.5.' + req.query.nodeid
+    var host = 'http://10.5.5.' + req.query.nodeid;
     if (process.env.USER == "fuchs") {
-      host = "http://localhost:8000"
+      host = "http://localhost:8000";
     }
-    postdata = { id: req.query.id, state: req.query.value == '1'}
+    postdata = { id: req.query.id, state: req.query.value == '1', turnon: req.query.turnon, turnoff: req.query.turnoff};
 
     request.post(host + '/relais', { json: postdata}, function (error, response, body) {
 			if (error) {

@@ -19,7 +19,7 @@ function printrow($first, $ts, $dat1, $dat2) {
 
 if (!$unit2_v) {
   $unit = $unit_v;
-  $qu = "select unix_timestamp(tstamp)*1000 as ts, value from sensors where id='" . $id . "' and unit='$unit'";
+  $qu = "select unix_timestamp(tstamp)*1000 as ts, value from sensors where id='" . $id . "' and unit='$unit' ORDER BY ts";
   $result = $conn->query($qu);
   if ($result === FALSE) {
     print "error with mysql" . $conn->error;
