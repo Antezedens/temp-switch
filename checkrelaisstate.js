@@ -12,7 +12,7 @@ let errfct = function($err) {
     }
 }
 
-function gpioState(postdata, ts, id, pin, state) {
+function gpioState(postdata, ts, id, pin, state, auto, force) {
     if (process.env.USER != "fuchs") {
 
         let valuePath = gpioBasePath + "gpio" + pin + "/value";
@@ -26,10 +26,10 @@ function gpioState(postdata, ts, id, pin, state) {
         }
         let value = state ? "0\n" : "1\n";
 
-        if (fs.readFileSync(valuePath).toString() != value) {
+        if (fs.readFileSync(valuePath).toString() != value || force) {
             console.log("updated value of " + pin);
             fs.writeFileSync(valuePath, value);
-            postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0)]);
+            postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0) | (auto ? 2 : 0)]);
         }
     } else {
       postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0)]);
@@ -47,7 +47,7 @@ exports.absolute_humidity = absolute_humidity;
 
 const laterfile = '/tmp/relais.later';
 	
-function update(relais) {
+function update(relais, force) {
   if (node == '1') {
     return
   }
@@ -60,7 +60,7 @@ function update(relais) {
     } catch(e) {		
     }
   
-    if (node == '10') {
+    if (node == '10' && relais[5].auto == true) {
       temp = jf.readFileSync('/tmp/temperature.json');
       var t_in = temp.in.temp;
       var t_out = temp.out.temp;
@@ -108,7 +108,7 @@ function update(relais) {
             updateRelaisFile = true;
         }
 
-        gpioState(postdata, ts, relais[i].id + 200, relais[i].gpio, relais[i].on);
+        gpioState(postdata, ts, relais[i].id + 200, relais[i].gpio, relais[i].on, relais[i].auto, force == i);
     }
     
     if (updateRelaisFile) {
@@ -134,7 +134,7 @@ exports.readRelais = function() {
     return jf.readFileSync(relaisFile);
 }
 
-function doWriteRelais(relais, doUpdate) {
+function doWriteRelais(relais, doUpdate, force) {
     jf.writeFile(relaisFile, relais, {
         spaces: 2,
         EOL: '\n'
@@ -143,16 +143,16 @@ function doWriteRelais(relais, doUpdate) {
             console.log(err);
         } else {
           if (doUpdate) {
-            update(relais);
+            update(relais, force);
           }
         }
     });
 }
 
-exports.writeRelais = function(relais) {
-  doWriteRelais(relais, true);
+exports.writeRelais = function(relais, force) {
+  doWriteRelais(relais, true, force);
 }
 
 exports.check = function() {
-    update(exports.readRelais());
+    update(exports.readRelais(), -1);
 }
