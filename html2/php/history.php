@@ -7,8 +7,6 @@ $id = $_GET['id'];
 $unit_v = $_GET['unit'];
 $unit2_v = $_GET['unit2'];
 
-$conn->query("SET time_zone = '+0:00';");
-
 function printrow($first, $ts, $dat1, $dat2) {
   if (!$first) {
     echo(",");

@@ -30,16 +30,20 @@ if (TRUE === $conn->query($qu)) {
   echo "<pre>" . $qu . "</pre>";
 }
 
-function orNull($string) {
+function timestamp($string) {
   if ($string == '') {
-    return NULL;
+    return 'NULL';
   }
-  return $string;
+  return "FROM_UNIXTIME($string / 1000)";
 }
 
 foreach($relais as $key => $value) {
-  $qu = "UPDATE relais SET turnon = '" . orNull($value.turnon) . "', turnoff = '" . orNull($value.turnoff) . "' WHERE id = '" . $value.id . "' ";
+  foreach($value as $k => $v) {
+    echo "{$k -> $v}";
+  }
+  $qu = "UPDATE relais SET turnon = " . timestamp($value[turnon]) . ", turnoff = " . timestamp($value[turnoff]) . " WHERE id = '" . $value[id] . "' ";
   if (TRUE === $conn->query($qu)) {
+    print_r($value);
     echo "Relais update ok $qu";
   } else {
     echo "Error updating relais: " . $conn->error;
