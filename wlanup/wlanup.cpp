@@ -7,7 +7,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define IFACE "wlan1"
+const char IFACE[16] = "wlan1";
+char buffer[128];
 void writeState(int state) {
   int stateFd = open("/tmp/wlan_state", O_WRONLY | O_CREAT, 0666);
   if (not stateFd) {
@@ -55,16 +56,22 @@ int checkaddressOk(int sock) {
 }
 
 int bringupIfDown() {
-  if (system("/sbin/iwgetid " IFACE " | /bin/grep tigernetz")) {
+  sprintf(buffer, "/sbin/iwgetid %s | /bin/grep tigernetz", IFACE);
+  if (system(buffer)) {
     printf("bring interface up...\n");
-    system("/sbin/ifup " IFACE);
+	sprintf(buffer, "/sbin/ifup %s", IFACE);
+    system(buffer);
     return 1;
   }
   return 0;
 }
 
-int main() {
-  int sock = socket(AF_INET, SOCK_DGRAM, 0);
+int main(int argc, char* argv[]) {
+  const int sock = socket(AF_INET, SOCK_DGRAM, 0);
+  if (argc > 1) {
+	  strcpy(IFACE, argv[1]);
+  }
+  
   if (not sock) {
     perror("could not open socket\n");
     return -1;
