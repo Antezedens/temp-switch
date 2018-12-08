@@ -45,8 +45,8 @@ int checkaddressOk(int sock) {
     inet_ntop(AF_INET, &my_sin->sin_addr, str, sizeof(str));
     printf("addr: %s - ok\n", str);
     if (not readState()) {
-      printf("restart python\n");
-      system("/usr/bin/killall python2.7");
+      //printf("restart python\n");
+      //system("/usr/bin/killall python2.7");
       writeState(1);
     }
     return 1;
