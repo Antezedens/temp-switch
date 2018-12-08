@@ -123,7 +123,7 @@ function update(relais, force) {
           console.log("error: " + error);
           fs.writeFileSync(laterfile, JSON.stringify(postdata));
         } else {
-          console.log(response);
+          console.log(response.body);
         }
       });
     }
