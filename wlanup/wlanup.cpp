@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-const char IFACE[16] = "wlan1";
+char IFACE[16] = "wlan1";
 char buffer[128];
 void writeState(int state) {
   int stateFd = open("/tmp/wlan_state", O_WRONLY | O_CREAT, 0666);
