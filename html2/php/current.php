@@ -3,7 +3,7 @@ header('Content-Type: text/html; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 require('db.php');
 
-$qu = "select s.id, s.value, src.name, u.name as unit, s.unit as unitid, (unix_timestamp(s.tstamp)*1000) as tstamp
+$qu = "select s.id, s.value, src.name, u.name as unit, s.unit as unitid, (unix_timestamp(s.tstamp)*1000) as tstamp, src.node
 from (
    select id, unit, max(tstamp) as latest
    from sensors group by id,unit
