@@ -95,8 +95,8 @@ fs.writeFileSync(transfile, JSON.stringify(transdata));
 console.log(postdata);
 
 if (postdata.length > 0) {
-	//request({url: 'http://fuchs.byethost11.com/sensor.php', method: "POST", json: false, body: "data=" + postdata}, function (error, response, body) {
-	request.post('http://fuchs.byethost11.com/sensor.php', { json: postdata}, function (error, response, body) {
+	//request({url: 'http://fuchsbau.cu.ma/sensor.php', method: "POST", json: false, body: "data=" + postdata}, function (error, response, body) {
+	request.post('http://fuchsbau.cu.ma/sensor.php', { json: postdata}, function (error, response, body) {
 		if (error) {
 			console.log("error: " + error);
 			fs.writeFileSync(laterfile, JSON.stringify(postdata));
