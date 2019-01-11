@@ -96,7 +96,7 @@ console.log(postdata);
 const postreq = require('./postrequest');
 
 if (postdata.length > 0) {
-	postreq.postrequest(laterfile, postdata, '', 0);
+	postreq.postrequest(laterfile, postdata, 0);
 	//request({url: 'http://fuchsbau.cu.ma/sensor.php', method: "POST", json: false, body: "data=" + postdata}, function (error, response, body) {
 	//request.post('http://fuchsbau.cu.ma/sensor.php', { json: postdata}, function (error, response, body) {
 }
