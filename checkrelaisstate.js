@@ -116,18 +116,9 @@ function update(relais, force) {
     }
     
     if (postdata.length > 0) {
-      console.log("post: " + postdata);
-      //request({url: 'http://fuchsbau.cu.ma/sensor.php', method: "POST", json: false, body: "data=" + postdata}, function (error, response, body) {
-      request.post('http://fuchsbau.cu.ma/sensor.php', { json: postdata}, function (error, response, body) {
-        if (error) {
-          console.log("error: " + error);
-          fs.writeFileSync(laterfile, JSON.stringify(postdata));
-        } else {
-          console.log(response.body);
-        }
-      });
+      const postreq = require('./postrequest');
+      postreq.postrequest(laterfile, postdata, 0);
     }
-
 }
 
 exports.readRelais = function() {

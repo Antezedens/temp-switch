@@ -92,12 +92,10 @@ addtemp(postdata, ts, cput, 11, 1.5, transdata);
 transdata.lastts = ts;
 fs.writeFileSync(transfile, JSON.stringify(transdata));
 
-console.log(postdata);
-const postreq = require('./postrequest');
-
 if (postdata.length > 0) {
+	console.log(postdata);
+	const postreq = require('./postrequest');
 	postreq.postrequest(laterfile, postdata, 0);
-	//request({url: 'http://fuchsbau.cu.ma/sensor.php', method: "POST", json: false, body: "data=" + postdata}, function (error, response, body) {
 }
 
 //require('./checkrelaisstate').check();

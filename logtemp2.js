@@ -122,11 +122,10 @@ parsetemp.getinternet((temp, humid) => {
 	transdata.lastts = ts;
 	fs.writeFileSync(transfile, JSON.stringify(transdata));
 
-	console.log(postdata);
 	require('./checkrelaisstate').check();
-	const postreq = require('./postrequest');
 	if (postdata.length > 0) {
-		//request({url: 'http://fuchsbau.cu.ma/sensor.php', method: "POST", json: false, body: "data=" + postdata}, function (error, response, body) {
+		console.log(postdata);
+		const postreq = require('./postrequest');
 		postreq.postrequest(laterfile, postdata, 0);
 	}
 });
