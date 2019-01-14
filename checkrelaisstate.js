@@ -29,10 +29,10 @@ function gpioState(postdata, ts, id, pin, state, auto, force, relais) {
         if (fs.readFileSync(valuePath).toString() != value || force) {
             console.log("updated value of " + pin);
             fs.writeFileSync(valuePath, value);
-            postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0) | (auto ? 2 : 0), relais]);
+            postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM:ss"), id, (state ? 1 : 0) | (auto ? 2 : 0), relais]);
         }
     } else {
-      postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0), relais]);
+      postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM:ss"), id, (state ? 1 : 0), relais]);
     }
 }
 
