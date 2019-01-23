@@ -90,18 +90,19 @@ function update(relais, force) {
       }
     }
 
-    console.log("update at " + (new Date()).getTime());
+    let now = (new Date()).getTime();
+    console.log("update at " + now + " / " + new Date());
     for (let i = 0; i < relais.length; ++i) {
         let turnon = relais[i].turnon;
         let turnoff = relais[i].turnoff;
         console.log("turnon/off " + turnon + "/" + turnoff);
-        if (turnon != "" && new Date(turnon) <= new Date()) {
+        if (turnon != "" && turnon <= now) {
             console.log("time to turnon! " + relais[i].gpio);
             relais[i].on = true;
             relais[i].turnon = "";
             updateRelaisFile = true;
         }
-        if (turnoff != "" && new Date(turnoff) <= new Date()) {
+        if (turnoff != "" && turnoff <= now) {
             console.log("time to turnoff! " + relais[i].gpio);
             relais[i].on = false;
             relais[i].turnoff = "";
