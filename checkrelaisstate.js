@@ -90,7 +90,7 @@ function update(relais, force) {
       }
     }
 
-    console.log("update: " + relais);
+    console.log("update at " + (new Date()).getTime());
     for (let i = 0; i < relais.length; ++i) {
         let turnon = relais[i].turnon;
         let turnoff = relais[i].turnoff;
