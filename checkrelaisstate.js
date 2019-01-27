@@ -29,10 +29,10 @@ function gpioState(postdata, ts, id, pin, state, auto, force, relais) {
         if (fs.readFileSync(valuePath).toString() != value || force) {
             console.log("updated value of " + pin);
             fs.writeFileSync(valuePath, value);
-            postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0) | (auto ? 2 : 0), relais]);
+            postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM:ss"), id, (state ? 1 : 0) | (auto ? 2 : 0), relais]);
         }
     } else {
-      postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, (state ? 1 : 0), relais]);
+      postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM:ss"), id, (state ? 1 : 0), relais]);
     }
 }
 
@@ -90,18 +90,19 @@ function update(relais, force) {
       }
     }
 
-    console.log("update: " + relais);
+    let now = (new Date()).getTime();
+    console.log("update at " + now + " / " + new Date());
     for (let i = 0; i < relais.length; ++i) {
         let turnon = relais[i].turnon;
         let turnoff = relais[i].turnoff;
         console.log("turnon/off " + turnon + "/" + turnoff);
-        if (turnon != "" && new Date(turnon) <= new Date()) {
+        if (turnon != "" && turnon <= now) {
             console.log("time to turnon! " + relais[i].gpio);
             relais[i].on = true;
             relais[i].turnon = "";
             updateRelaisFile = true;
         }
-        if (turnoff != "" && new Date(turnoff) <= new Date()) {
+        if (turnoff != "" && turnoff <= now) {
             console.log("time to turnoff! " + relais[i].gpio);
             relais[i].on = false;
             relais[i].turnoff = "";
@@ -116,18 +117,9 @@ function update(relais, force) {
     }
     
     if (postdata.length > 0) {
-      console.log("post: " + postdata);
-      //request({url: 'http://fuchs.byethost11.com/sensor.php', method: "POST", json: false, body: "data=" + postdata}, function (error, response, body) {
-      request.post('http://fuchs.byethost11.com/sensor.php', { json: postdata}, function (error, response, body) {
-        if (error) {
-          console.log("error: " + error);
-          fs.writeFileSync(laterfile, JSON.stringify(postdata));
-        } else {
-          console.log(response.body);
-        }
-      });
+      const postreq = require('./postrequest');
+      postreq.postrequest(laterfile, postdata, 0);
     }
-
 }
 
 exports.readRelais = function() {

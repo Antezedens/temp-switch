@@ -92,18 +92,10 @@ addtemp(postdata, ts, cput, 11, 1.5, transdata);
 transdata.lastts = ts;
 fs.writeFileSync(transfile, JSON.stringify(transdata));
 
-console.log(postdata);
-
 if (postdata.length > 0) {
-	//request({url: 'http://fuchs.byethost11.com/sensor.php', method: "POST", json: false, body: "data=" + postdata}, function (error, response, body) {
-	request.post('http://fuchs.byethost11.com/sensor.php', { json: postdata}, function (error, response, body) {
-		if (error) {
-			console.log("error: " + error);
-			fs.writeFileSync(laterfile, JSON.stringify(postdata));
-		} else {
-		  console.log(response);
-	  }
-	});
+	console.log(postdata);
+	const postreq = require('./postrequest');
+	postreq.postrequest(laterfile, postdata, 0);
 }
 
 //require('./checkrelaisstate').check();

@@ -31,6 +31,8 @@ exports.setRelais = function(req, res) {
 		            force = i;
                 relais[i].on = (body.state & 1) == 1;
 		            relais[i].auto = (body.state & 2) == 2;
+                relais[i].turnon = "";
+                relais[i].turnoff = "";
                 if (body.state && 'excludes' in relais[i]) {
                     let excludes = relais[i].excludes;
                     for (let j = 0; j < relais.length; ++j) {

@@ -5,13 +5,20 @@ var execSync = require('child_process').execSync;
 var http = require('http');
 
 exports.getDHT22 = function(pin) {
+    var overtemp = 5;
     for (var i = 0; i < 50; ++i) {
         try {
             var output = execSync("dht22/dht " + pin).toString('utf8');
             let result = output.split(" ");
+            let temp = parseFloat(result[1].split("=")[1]);
+            if (temp > 40 && overtemp > 0) {
+              overtemp--;
+              continue;
+            }
+            let humid = parseFloat(result[0].split("=")[1]);
             let out = {
-                humidity: parseFloat(result[0].split("=")[1]),
-                temp: parseFloat(result[1].split("=")[1])
+                humidity: humid,
+                temp: temp
             };
             console.log('h/t:' + out['humidity'] + "/" + out['temp']);
             return out;
