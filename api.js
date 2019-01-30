@@ -12,7 +12,7 @@ let errfct = function($err) {
 }
 
 // GET
-exports.relais = function(req, res) {
+exports.localRelais = function(req, res) {
     console.log('Getting switches.');
     res.status(200).json(checkrelaisstate.readRelais());
 };

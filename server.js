@@ -11,8 +11,9 @@ app.use(bodyParser.json());
 
 // JSON API
 app.use(express.static('html'));
-app.get('/relais', api.relais);
+app.get('/localRelais', api.localRelais);
 app.post('/relais', api.setRelais);
+app.get('/relais', require('./api/relais.js').relais);
 app.get('/pull', api.pull);
 app.get('/status', api.status);
 app.get('/restart', api.restart);
