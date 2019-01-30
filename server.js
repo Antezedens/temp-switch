@@ -17,6 +17,9 @@ app.get('/pull', api.pull);
 app.get('/status', api.status);
 app.get('/restart', api.restart);
 app.get('/setRelaisOnNode', api.setRelaisOnNode);
+app.get('/current', require('./api/current.js').current);
+app.get('/history', require('./api/history.js').history);
+app.post('/sensor', require('./api/sensor.js').sensor);
 //app.put('/switches/:id', api.editSwitch);
 //app.delete('/switches/:id', api.deleteSwitch);
 
