@@ -12,7 +12,7 @@ exports.sensor = (req, res) => {
     let entry = data[i];
     values.push("('" + entry[0]+ "'," + (entry[1]%100) + ","+ Math.floor(entry[1]/100) + "," + entry[2]+")");
     if (entry.length > 3) {
-      relais[entry[1]] = entry[3];
+      relais.push(entry[3]);
     }
   }
   let qu = "INSERT INTO sensors VALUES " + values.join(',') + ";";
@@ -27,4 +27,6 @@ exports.sensor = (req, res) => {
   }
   
   db.close();
+  res.write('ok');
+  res.status(200).send();      
 }
