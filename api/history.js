@@ -13,7 +13,7 @@ exports.history = (req, res) => {
 	let db = new sqlite3.Database('data.sqlite');
 	if (!unit2_v) {
 		let unit = unit_v;
-		let qu = "select strftime(tstamp)*1000 as ts, value from sensors where id=? and unit=? ORDER BY ts";
+		let qu = "select strftime('%s', tstamp)*1000 as ts, value from sensors where id=? and unit=? ORDER BY ts";
 		var resultArray = [];
 		db.each(qu, [id, unit], (err, result) => {
 			resultArray.push("[" + result.ts+","+result.value+"]");
@@ -26,7 +26,7 @@ exports.history = (req, res) => {
 	} else {
 		let unit = Math.min(unit_v, unit2_v);
 		let unit2 = Math.max(unit_v, unit2_v);
-		let qu = "select strftime(tstamp)*1000 as ts, value, unit from sensors where id=? and (unit=? or unit=?) ORDER BY ts,unit";
+		let qu = "select strftime('%s', tstamp)*1000 as ts, value, unit from sensors where id=? and (unit=? or unit=?) ORDER BY ts,unit";
 		var resultArray = [];
 		
 		var lastvalue = null;

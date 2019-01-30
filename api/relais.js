@@ -3,7 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 exports.relais = function(req, res) {
   let db = new sqlite3.Database('data.sqlite');
 
-  db.all("select rel.id, rel.name, rel.nodeid, s.value, (strftime(rel.turnon) * 1000) as turnon, (strftime(rel.turnoff) * 1000) as turnoff \
+  db.all("select rel.id, rel.name, rel.nodeid, s.value, (strftime('%s', rel.turnon) * 1000) as turnon, (strftime("%s", rel.turnoff) * 1000) as turnoff \
  from (\
   select id, unit, max(tstamp) as latest \
   from sensors \
