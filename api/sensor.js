@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 
 function timestamp(ts) {
-  return ts > 0 ? "datetime(" + ts + "/1000,'unixepoch')" : null;
+  return ts > 0 ? "datetime(" + ts + "/1000,'unixepoch')" : "null";
 }
 
 exports.sensor = (req, res) => {
@@ -22,8 +22,8 @@ exports.sensor = (req, res) => {
   
   for(var i=0;i<relais.length; ++i) {
     let value = relais[i];
-    qu = "UPDATE relais SET turnon = ?, turnoff = ? WHERE id = ?";
-    db.run(qu, [timestamp(value.turnon), timestamp(value.turnoff), value.id])
+    qu = "UPDATE relais SET turnon = " + timestamp(value.turnon) + ", turnoff = " + timestamp(value.turnoff) + " WHERE id = ?";
+    db.run(qu, [value.id])
   }
   
   db.close();
