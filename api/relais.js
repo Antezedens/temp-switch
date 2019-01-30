@@ -15,8 +15,8 @@ exports.relais = function(req, res) {
       }
 	  //console.log(rows);
       db.close();
-      //res.write(JSON.stringify(rows));
-      //res.status(200).send();      
+      res.write(JSON.stringify(rows));
+      res.status(200).send();      
     });
 
 }
