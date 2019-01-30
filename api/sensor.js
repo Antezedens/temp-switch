@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 
 function timestamp(ts) {
-  return ts > 0 ? ts : null;
+  return ts > 0 ? "datetime(" + ts + "/1000,'unixepoch')" : null;
 }
 
 exports.sensor = (req, res) => {
