@@ -8,7 +8,7 @@ function postrequest(laterfile, postdata, attempt) {
 		cookie = "";
 	}
 	request({ 
-		url: 'http://10.5.5.1/sensor.php',
+		url: 'http://10.5.5.1/sensor',
 		method: 'POST',
 		json: postdata,
 		headers: {
