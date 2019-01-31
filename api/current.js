@@ -4,7 +4,7 @@ exports.current = function(req, res) {
   let db = new sqlite3.Database('data.sqlite');
   db.configure("busyTimeout", 5000);
   
-  db.all("select s.id, s.value, src.name, u.name as unit, s.unit as unitid, strftime('%s',s.tstamp)*1000 as tstamp, src.node \
+  db.all("select s.id, round(s.value, 2) as value, src.name, u.name as unit, s.unit as unitid, strftime('%s',s.tstamp)*1000 as tstamp, src.node \
   from (\
      select id, unit, max(tstamp) as latest\
      from sensors group by id,unit\
