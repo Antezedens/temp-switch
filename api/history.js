@@ -11,6 +11,7 @@ exports.history = (req, res) => {
 	res.set('Content-Encoding', 'gzip');	
 	
 	let db = new sqlite3.Database('data.sqlite');
+	db.configure("busyTimeout", 5000);
 	if (!unit2_v) {
 		let unit = unit_v;
 		let qu = "select strftime('%s', tstamp)*1000 as ts, value from sensors where id=? and unit=? ORDER BY ts";

@@ -17,6 +17,7 @@ exports.sensor = (req, res) => {
   }
   let qu = "INSERT INTO sensors VALUES " + values.join(',') + ";";
   let db = new sqlite3.Database('data.sqlite');
+  db.configure("busyTimeout", 5000);
 
   db.run(qu);
   
