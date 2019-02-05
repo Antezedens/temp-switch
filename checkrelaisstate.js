@@ -3,7 +3,7 @@ var fs = require('fs');
 var request = require('request');
 var dateformat = require('dateformat');
 
-var node = fs.readFileSync('node.txt').toString().trim();
+var node = require('./nodeid.js').nodeid;
 var relaisFile = './relais' + node + '.json'
 const gpioBasePath = "/sys/class/gpio/"
 let errfct = function($err) {

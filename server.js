@@ -1,10 +1,18 @@
 var express = require('express'),
     api = require('./api');
 var app = express();
+var basicAuth = require('express-basic-auth');
 var bodyParser     =        require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+var node = require('./nodeid.js').nodeid;
+if (node == "1") {
+  app.use(basicAuth({
+    users: { bernhard: 'fuchshaus'},
+    challenge: true
+  }));
+}
 /*app.configure(function(){
   app.use(express.bodyParser());
 });*/
