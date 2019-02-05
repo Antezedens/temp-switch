@@ -10,7 +10,6 @@ function postrequest(laterfile, postdata, attempt) {
 	request({ 
 		url: 'http://bernhard:fuchshaus@10.5.5.1/sensor',
 		method: 'POST',
-		auth: 'bernhard:fuchshaus',
 		json: postdata,
 		headers: {
 			'Cookie': cookie
