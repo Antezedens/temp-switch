@@ -11,7 +11,6 @@ try {
 } catch (e) {
 	cput = "null";
 }
-
 function datapush(data, id, ts, value) {
 	data.push([dateformat(ts, "yyyy-mm-dd HH:MM"), id, value]);
 }
@@ -68,6 +67,7 @@ function addtemp(data, ts, value, id, delta, transdata) {
 
 const laterfile = '/tmp/sensors.later';
 const transfile = '/tmp/transition.json';
+const statsfile = '/tmp/netstats.json';
 
 var transdata = {
 	lastts: 0,
@@ -83,6 +83,30 @@ try {
 	postdata = JSON.parse(fs.readFileSync(laterfile));
 	fs.unlinkSync(laterfile);
 } catch(e) {		
+}
+
+var oldstats = [];
+try {
+	oldstats = JSON.parse(fs.readFileSync(statsfile));
+} catch(e) {
+}
+
+try {
+	//let iface = "enp3s0";enx0c5b8f279a64
+	let iface = "enx0c5b8f279a64";
+	netstats = {
+		up: parseInt(fs.readFileSync('/sys/class/net/' + iface + '/statistics/tx_bytes')),
+		down: parseInt(fs.readFileSync('/sys/class/net/' + iface + '/statistics/rx_bytes'))
+	};
+	fs.writeFileSync(statsfile, JSON.stringify(netstats));
+} catch(e) {
+	netstats = "null";
+}
+if ('up' in netstats && 'up' in oldstats) {
+	let upRate = (netstats.up - oldstats.up) / (1024.0 * 1024.0);
+	let downRate = (netstats.down - oldstats.down) / (1024.0 * 1024.0);
+	addtemp(postdata, ts, upRate, 312, 0.1, transdata);
+	addtemp(postdata, ts, downRate, 313, 0.1, transdata);
 }
 
 addtemp(postdata, ts, dht22['humidity'], 108, 0.15, transdata);
