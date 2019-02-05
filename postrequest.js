@@ -8,7 +8,7 @@ function postrequest(laterfile, postdata, attempt) {
 		cookie = "";
 	}
 	request({ 
-		url: 'http://10.5.5.1/sensor',
+		url: 'http://bernhard:fuchshaus@10.5.5.1/sensor',
 		method: 'POST',
 		auth: 'bernhard:fuchshaus',
 		json: postdata,
@@ -23,7 +23,7 @@ function postrequest(laterfile, postdata, attempt) {
 		} else {
 
 		  console.log(response);
-		if (response.body.indexOf('requires Javascript to work') > 0 && attempt < 1) {
+		if (response.body && response.body.indexOf('requires Javascript to work') > 0 && attempt < 1) {
 			console.log(response.body);
 			var scriptregex = /<script>(.*)<\/script>/g;
 			match = scriptregex.exec(response.body);
