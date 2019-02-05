@@ -102,9 +102,13 @@ try {
 } catch(e) {
 	netstats = "null";
 }
+
+function convertToMb(value) {
+	return Math.round(value / (1024.0 * 10.24)) / 100.0;
+}
 if ('up' in netstats && 'up' in oldstats) {
-	let upRate = (netstats.up - oldstats.up) / (1024.0 * 1024.0);
-	let downRate = (netstats.down - oldstats.down) / (1024.0 * 1024.0);
+	let upRate = convertToMb(netstats.up - oldstats.up);
+	let downRate = convertToMb(netstats.down - oldstats.down);
 	addtemp(postdata, ts, upRate, 312, 0.1, transdata);
 	addtemp(postdata, ts, downRate, 313, 0.1, transdata);
 }
