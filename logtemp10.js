@@ -129,5 +129,3 @@ parsetemp.getinternet((temp, humid) => {
 		postreq.postrequest(laterfile, postdata, 0);
 	}
 });
-
-// /sys/devices/virtual/thermal/thermal_zone0/temp

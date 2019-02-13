@@ -98,5 +98,4 @@ if (postdata.length > 0) {
 	postreq.postrequest(laterfile, postdata, 0);
 }
 
-//require('./checkrelaisstate').check();
-// /sys/devices/virtual/thermal/thermal_zone0/temp
+require('./checkrelaisstate').check();
