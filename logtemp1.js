@@ -7,7 +7,7 @@ var dateformat = require('dateformat');
 var dht22 = parsetemp.getDHT22(6);
 
 try {
-	cput = parseInt(fs.readFileSync('/sys/devices/virtual/thermal/thermal_zone0/temp')) / 1000.0;
+	cput = Math.round(parseInt(fs.readFileSync('/sys/devices/virtual/thermal/thermal_zone0/temp')) / 1000.0);
 } catch (e) {
 	cput = "null";
 }
@@ -115,7 +115,7 @@ if ('up' in netstats && 'up' in oldstats) {
 
 addtemp(postdata, ts, dht22['humidity'], 108, 0.15, transdata);
 addtemp(postdata, ts, dht22['temp'],8, 0.15, transdata);
-addtemp(postdata, ts, cput, 9, 1.5, transdata);
+addtemp(postdata, ts, cput, 9, 10, transdata);
 	
 transdata.lastts = ts;
 fs.writeFileSync(transfile, JSON.stringify(transdata));
