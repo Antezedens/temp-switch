@@ -19,7 +19,7 @@ var v = parsetemp.getw1temps(w1_sensors)
 console.log("t: " + v);
 
 try {
-	cput = parseInt(fs.readFileSync('/sys/devices/virtual/thermal/thermal_zone0/temp'));
+	cput = Math.round(parseInt(fs.readFileSync('/sys/devices/virtual/thermal/thermal_zone0/temp')) / 1000.0);
 } catch (e) {
 	cput = "null";
 }
