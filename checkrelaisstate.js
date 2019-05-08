@@ -127,18 +127,13 @@ exports.readRelais = function() {
 }
 
 function doWriteRelais(relais, doUpdate, force) {
-    jf.writeFile(relaisFile, relais, {
+    jf.writeFileSync(relaisFile, relais, {
         spaces: 2,
         EOL: '\n'
-    }, function(err) {
-        if (err) {
-            console.log(err);
-        } else {
-          if (doUpdate) {
-            update(relais, force);
-          }
-        }
     });
+    if (doUpdate) {
+      update(relais, force);
+    }
 }
 
 exports.writeRelais = function(relais, force) {

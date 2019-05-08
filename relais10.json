@@ -4,7 +4,8 @@
     "on": false,
     "gpio": 198,
     "turnon": "",
-    "turnoff": ""
+    "turnoff": "",
+    "auto": false
   },
   {
     "id": 51,
@@ -27,7 +28,8 @@
     "on": false,
     "gpio": 19,
     "turnon": "",
-    "turnoff": ""
+    "turnoff": "",
+    "auto": true
   },
   {
     "id": 54,
