@@ -81,7 +81,7 @@ function addtemp(data, ts, value, id, delta, transdata) {
 const laterfile = '/tmp/sensors.later';
 const transfile = '/tmp/transition.json';
 const internet = '/tmp/temperature.json';
-parsetemp.getinternet((temp, humid) => {
+parsetemp.getinternet((temp, humid, rain) => {
 
 	var transdata = {
 		lastts: 0,
@@ -112,6 +112,7 @@ parsetemp.getinternet((temp, humid) => {
 	addtemp(postdata, ts, temp, 0, 0.15, transdata);
 	addtemp(postdata, ts, dht22['temp'],1, 0.15, transdata);
 	addtemp(postdata, ts, cput, 2, 1.5, transdata);
+	addtemp(postdata, ts, rain, 400, 0.1, transdata);
 
 	addtemp(postdata, ts, v[0], 3, 0.15, transdata);
 	addtemp(postdata, ts, v[1], 4, 0.15, transdata);

@@ -70,7 +70,7 @@ exports.getw1temps = function(files) {
 
 exports.getinternet = function(ondone) {
 
-    http.get('http://api.openweathermap.org/data/2.5/weather?lat=47.861100&lon=16.38851535&appid=2d9e793f39595d541211329eb858da6f', (res) => {
+    http.get('http://api.openweathermap.org/data/2.5/weather?q=neufeld+an+der+leitha&appid=2d9e793f39595d541211329eb858da6f', (res) => {
         const {
             statusCode
         } = res;
@@ -88,7 +88,7 @@ exports.getinternet = function(ondone) {
             console.error(error.message);
             // consume response data to free up memory
             res.resume();
-            ondone(null, null);
+            ondone(null, null, null);
             return;
         }
 
@@ -103,14 +103,18 @@ exports.getinternet = function(ondone) {
                 console.log(parsedData);
                 temp = parsedData['main']['temp'] - 273.15;
                 humid = parsedData['main']['humidity'];
-                ondone(temp, humid);
+		if ('rain' in parsedData) {    
+			rain = parsedData['rain']['1h'];    
+		}	
+		    else rain = null;    
+                ondone(temp, humid, rain);
             } catch (e) {
                 console.error(e.message);
-                ondone(null, null);
+                ondone(null, null, null);
             }
         });
     }).on('error', (e) => {
         console.error(`Got error: ${e.message}`);
-        ondone(null, null);
+        ondone(null, null, null);
     });
 }
