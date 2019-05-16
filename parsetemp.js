@@ -106,7 +106,7 @@ exports.getinternet = function(ondone) {
 		if ('rain' in parsedData) {    
 			rain = parsedData['rain']['1h'];    
 		}	
-		    else rain = null;    
+		    else rain = 0.0;    
                 ondone(temp, humid, rain);
             } catch (e) {
                 console.error(e.message);
