@@ -18,8 +18,7 @@ int main ()
 	}
 	ioctl(fd, I2C_SLAVE, 0x40);
 	
-	printf("%5.2fC\n", getTemperature(fd));
-	printf("%5.2f%%rh\n", getHumidity(fd));
+	printf("H=%5.2f T=%5.2f\n", getHumidity(fd), getTemperature(fd));
 	
 	return 0;
 }
