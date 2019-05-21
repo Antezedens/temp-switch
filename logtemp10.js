@@ -13,7 +13,7 @@ for (let i=0; i<setup.sensors.length; ++i) {
 	}
 }
 console.log(w1_sensors);
-var dht22 = parsetemp.getDHT22(12);
+var dht22 = parsetemp.getHTU21(12);
 
 var v = parsetemp.getw1temps(w1_sensors)
 console.log("t: " + v);
