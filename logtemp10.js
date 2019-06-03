@@ -69,7 +69,7 @@ function addtemp(data, ts, value, id, delta, transdata) {
 		if (!(id in transdata.data)) {
 			transdata.data[id] = {
 				lasttss: 0,
-				lastvalues: 0,
+				lastvalues: -100,
 				transition: null
 			};
 		}
