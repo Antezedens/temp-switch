@@ -24,7 +24,8 @@ parsetemp.getinternet((temp, humid, rain) => {
 			humidity: humid, 
 			temp: temp
 		},
-		in: dht22
+		in: dht22,
+		water: v[1]
 	});
 
 	lt.logtemp(function(cput, postdata, ts, transdata) {		
