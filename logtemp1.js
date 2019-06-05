@@ -33,8 +33,8 @@ lt.logtemp(function(cput, postdata, ts, transdata) {
 	if ('up' in netstats && 'up' in oldstats) {
 		let upRate = convertToMb(netstats.up - oldstats.up);
 		let downRate = convertToMb(netstats.down - oldstats.down);
-		addtemp(postdata, ts, upRate, 312, 0.1, transdata);
-		addtemp(postdata, ts, downRate, 313, 0.1, transdata);
+		lt.addtemp(postdata, ts, upRate, 312, 0.1, transdata);
+		lt.addtemp(postdata, ts, downRate, 313, 0.1, transdata);
 	}
 
 	lt.addtemp(postdata, ts, dht22['humidity'], 108, 0.15, transdata);
