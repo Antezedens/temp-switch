@@ -29,7 +29,7 @@ function gpioState(postdata, ts, id, pin, state, auto, force, relais) {
         if (fs.readFileSync(valuePath).toString() != value || force) {
             console.log("updated value of " + pin);
             fs.writeFileSync(valuePath, value);
-            postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM:ss"), id, (state ? 1 : 0) | (auto ? 2 : 0), relais]);
+            postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM:ss"), id, (state ? 1 : 0) | (auto << 1), relais]);
         }
     } else {
       postdata.push([dateformat(ts, "yyyy-mm-dd HH:MM:ss"), id, (state ? 1 : 0), relais]);
@@ -60,33 +60,45 @@ function update(relais, force) {
     } catch(e) {		
     }
   
-    if (node == '10' && relais[5].auto == true) {
-      temp = jf.readFileSync('/tmp/temperature.json');
-      var t_in = temp.in.temp;
-      var t_out = temp.out.temp;
-      var h_in = temp.in.humidity;
-      var h_out = temp.out.humidity;
+    if (node == '10') {
+      if (relais[5].auto) {
+        temp = jf.readFileSync('/tmp/temperature.json');
+        var t_in = temp.in.temp;
+        var t_out = temp.out.temp;
+        var h_in = temp.in.humidity;
+        var h_out = temp.out.humidity;
 
-      var abs_h_in = absolute_humidity(t_in, h_in);
-      var abs_h_out = absolute_humidity(t_out, h_out);
-      if (abs_h_in < abs_h_out + 3.5) {
-        if (relais[5].on == true) {
-            relais[5].on = false;
-            updateRelaisFile = true;
-        }
-      }
-      else if (h_in >= 92) {
-        console.log("fan should be running");
-          if (relais[5].on == false) {
-              relais[5].on = true;
-              updateRelaisFile = true;
-          }
-      } else if (h_in <= 89){
-        console.log("fan should not be running");
+        var abs_h_in = absolute_humidity(t_in, h_in);
+        var abs_h_out = absolute_humidity(t_out, h_out);
+        if (abs_h_in < abs_h_out + 3.5) {
           if (relais[5].on == true) {
               relais[5].on = false;
               updateRelaisFile = true;
           }
+        }
+        else if (h_in >= 92) {
+          console.log("fan should be running");
+            if (relais[5].on == false) {
+                relais[5].on = true;
+                updateRelaisFile = true;
+            }
+        } else if (h_in <= 89){
+          console.log("fan should not be running");
+            if (relais[5].on == true) {
+                relais[5].on = false;
+                updateRelaisFile = true;
+            }
+        }
+      }
+      const waterrelais = 1;
+      if (relais[waterrelais].auto == 2) {
+        temp = jf.readFileSync('/tmp/temperature.json');
+        if (temp.water < 29) {
+          if (relais[waterrelais].on == true) {
+            relais[waterrelais].on = false;
+            updateRelaisFile = true;
+          }
+        }
       }
     }
 

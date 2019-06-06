@@ -30,7 +30,7 @@ exports.setRelais = function(req, res) {
             if ('state' in body) {
 		            force = i;
                 relais[i].on = (body.state & 1) == 1;
-		            relais[i].auto = (body.state & 2) == 2;
+		            relais[i].auto = body.state >> 1;
                 relais[i].turnon = "";
                 relais[i].turnoff = "";
                 if (body.state && 'excludes' in relais[i]) {
@@ -70,9 +70,6 @@ exports.setRelaisOnNode = function(req, res) {
       host = "http://localhost:8000";
     }
     var state = req.query.value;
-    if ('auto' in req.query) {
-	    state = req.query.auto;
-    }
     postdata = { id: req.query.id, state: state, turnon: req.query.turnon, turnoff: req.query.turnoff}
 
     request.post(host + '/relais', { json: postdata}, function (error, response, body) {
