@@ -96,6 +96,7 @@ function update(relais, force) {
         if (temp.water < 22) {
           if (relais[waterrelais].on == true) {
             relais[waterrelais].on = false;
+            relais[waterrelais].auto = 0;
             updateRelaisFile = true;
           }
         }
