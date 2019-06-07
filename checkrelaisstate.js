@@ -90,10 +90,10 @@ function update(relais, force) {
             }
         }
       }
-      const waterrelais = 1;
+      const waterrelais = 3;
       if (relais[waterrelais].auto == 2) {
         temp = jf.readFileSync('/tmp/temperature.json');
-        if (temp.water < 29) {
+        if (temp.water < 22) {
           if (relais[waterrelais].on == true) {
             relais[waterrelais].on = false;
             updateRelaisFile = true;
