@@ -6,26 +6,32 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 var node = require('./nodeid.js').nodeid;
+var auth = function(req, res, next) {
+  next();
+}
 if (node == "1") {
+  var jf = require('jsonfile');
+  cred = jf.readFileSync('./cred.js');
   var basicAuth = require('express-basic-auth');
-  app.use(basicAuth({
-    users: { bernhard: 'fuchshaus'},
+  auth = basicAuth({
+    users: cred,
     challenge: true
-  }));
+  });
 }
 /*app.configure(function(){
   app.use(express.bodyParser());
 });*/
 
 // JSON API
-app.use(express.static('html'));
-app.get('/localRelais', api.localRelais);
-app.post('/relais', api.setRelais);
-app.get('/relais', require('./api/relais.js').relais);
-app.get('/pull', api.pull);
-app.get('/status', api.status);
-app.get('/restart', api.restart);
-app.get('/setRelaisOnNode', api.setRelaisOnNode);
+app.use('/', express.static('html'));
+app.use('/view/', express.static('html'));
+app.get('/localRelais', auth, api.localRelais);
+app.post('/relais', auth, api.setRelais);
+app.get('/relais', auth, require('./api/relais.js').relais);
+app.get('/pull', auth, api.pull);
+app.get('/status', auth, api.status);
+app.get('/restart', auth, api.restart);
+app.get('/setRelaisOnNode', auth, api.setRelaisOnNode);
 app.get('/current', require('./api/current.js').current);
 app.get('/history', require('./api/history.js').history);
 app.post('/sensor', require('./api/sensor.js').sensor);
