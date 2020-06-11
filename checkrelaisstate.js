@@ -12,7 +12,7 @@ let errfct = function($err) {
     }
 }
 
-function gpioState(postdata, ts, id, pin, state, auto, force, relais) {
+function gpioState(postdata, ts, id, pin, state, auto, force, relais, invert) {
     if (process.env.USER != "fuchs") {
 
         let valuePath = gpioBasePath + "gpio" + pin + "/value";
@@ -24,7 +24,7 @@ function gpioState(postdata, ts, id, pin, state, auto, force, relais) {
             console.log("updated direction of " + pin);
             fs.writeFileSync(directionPath, "out");
         }
-        let value = state ? "0\n" : "1\n";
+       	let value = (state && !invert) || (!state && invert) ? "0\n" : "1\n";
 
         if (fs.readFileSync(valuePath).toString() != value || force) {
             console.log("updated value of " + pin);
@@ -48,7 +48,7 @@ exports.absolute_humidity = absolute_humidity;
 const laterfile = '/tmp/relais.later';
 	
 function update(relais, force) {
-  if (node == '1') {
+  if (node == '1' && false) {
     return
   }
     var ts = Date.now();
@@ -122,7 +122,7 @@ function update(relais, force) {
             updateRelaisFile = true;
         }
 
-        gpioState(postdata, ts, relais[i].id + 200, relais[i].gpio, relais[i].on, relais[i].auto, force == i, relais[i]);
+        gpioState(postdata, ts, relais[i].id + 200, relais[i].gpio, relais[i].on, relais[i].auto, force == i, relais[i], relais[i].invert);
     }
     
     if (updateRelaisFile) {

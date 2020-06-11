@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": 66,
+    "on": true,
+    "gpio": 7,
+    "auto": 0,
+    "turnon": "",
+    "turnoff": "",
+    "invert": true
+  }
+]
