@@ -4,6 +4,8 @@ Description=Website
 [Service]
 ExecStart=/usr/bin/node server.js
 WorkingDirectory=/root/temp-switch/
+Restart=on-failure
+RestartSec=60s
 
 [Install]
 WantedBy=multi-user.target
