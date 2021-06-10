@@ -4,6 +4,7 @@ var setup = require('./setup');
 var request = require('request');
 const fs = require('fs');
 var checkrelaisstate = require('./checkrelaisstate.js');
+var irrigation = require('./irrigation.js');
 const zlib = require('zlib');
 let errfct = function($err) {
     if ($err) {
@@ -16,6 +17,35 @@ exports.localRelais = function(req, res) {
     console.log('Getting switches.');
     res.status(200).json(checkrelaisstate.readRelais());
 };
+
+exports.getIrrigation = function(req, res) {
+    var oldstate = irrigation.readStatus();
+	console.log('getirre');
+	if ('on' in req.query) {
+	console.log('on !!!');
+		oldstate.on = req.query.on;
+    		irrigation.write(oldstate);	
+	}
+    res.status(200).json(irrigation.readStatus());
+}
+
+exports.setIrrigation = function(req, res) {
+    var oldstate = irrigation.readStatus();
+    var body = req.body;
+    console.log('irrigation: ' + JSON.stringify(body));	
+    if ('duration' in body) {
+	console.log('has duration: ' + JSON.stringify(body.duration));
+    	for (var item in body.duration) {
+	    oldstate.duration[item] = body.duration[item];	
+	}
+    }
+    if ('on' in body) {
+	oldstate.on = body.on;
+    }
+    irrigation.write(oldstate);	
+    res.status(200).send();
+}
+
 
 // PUT
 exports.setRelais = function(req, res) {
@@ -148,3 +178,4 @@ exports.restart = function(req, res) {
         });
     });
 }
+

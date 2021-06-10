@@ -29,6 +29,9 @@ app.get('/setRelaisOnNode', api.setRelaisOnNode);
 app.get('/current', require('./api/current.js').current);
 app.get('/history', require('./api/history.js').history);
 app.post('/sensor', require('./api/sensor.js').sensor);
+app.get('/sensorlive', require('./api/sensorlive.js').sensorlive);
+app.get('/irrigation', api.getIrrigation);
+app.post('/irrigation', api.setIrrigation);
 //app.put('/switches/:id', api.editSwitch);
 //app.delete('/switches/:id', api.deleteSwitch);
 
