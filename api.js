@@ -4,6 +4,7 @@ var setup = require('./setup');
 var request = require('request');
 const fs = require('fs');
 var checkrelaisstate = require('./checkrelaisstate.js');
+var irrigation = require('./irrigation.js');
 const zlib = require('zlib');
 let errfct = function($err) {
     if ($err) {
@@ -16,6 +17,45 @@ exports.localRelais = function(req, res) {
     console.log('Getting switches.');
     res.status(200).json(checkrelaisstate.readRelais());
 };
+
+exports.getIrrigation = function(req, res) {
+    var oldstate = irrigation.readStatus();
+	console.log('getirre: ' + JSON.stringify(req.query));
+	var change = false;
+	if ('on' in req.query) {
+		oldstate.on = req.query.on;
+		change = true;
+	}
+	for (i=0; i<6; i++) {
+		let key = "duration" + i;
+		if (key in req.query) {
+			oldstate.duration[i] = req.query[key];
+			change = true;
+		}
+	}
+	if (change) {
+    		irrigation.write(oldstate);	
+	}
+    res.status(200).json(oldstate);
+}
+
+exports.setIrrigation = function(req, res) {
+    var oldstate = irrigation.readStatus();
+    var body = req.body;
+    console.log('irrigation: ' + JSON.stringify(body));	
+    if ('duration' in body) {
+	console.log('has duration: ' + JSON.stringify(body.duration));
+    	for (var item in body.duration) {
+	    oldstate.duration[item] = body.duration[item];	
+	}
+    }
+    if ('on' in body) {
+	oldstate.on = body.on;
+    }
+    irrigation.write(oldstate);	
+    res.status(200).send();
+}
+
 
 // PUT
 exports.setRelais = function(req, res) {
@@ -148,3 +188,4 @@ exports.restart = function(req, res) {
         });
     });
 }
+
