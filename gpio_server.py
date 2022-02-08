@@ -2,6 +2,7 @@
 
 import os
 from flask import Flask, jsonify, request
+# apt install python3-flash
 
 sysfs='/sys/class/gpio/'
 
