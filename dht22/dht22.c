@@ -5,8 +5,6 @@
  *	Amended by technion@lolware.net
  */
 
-#include <wiringPi.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -24,6 +22,10 @@
 #define MAXTIMINGS 85
 static int DHTPIN = 12;
 static int dht22_dat[5] = {0,0,0,0,0};
+static const int OUTPUT = 1;
+static const int INPUT = 0;
+static const int HIGH = 1;
+static const int LOW = 0;
 
 void delayMicroseconds(int us) {
 	struct timespec ts;
@@ -205,9 +207,6 @@ int main (int argc, char *argv[])
 
   lockfd = open_lockfile(LOCKFILE);
 
-  if (wiringPiSetupGpio () == -1)
-    exit(EXIT_FAILURE) ;
-	
   if (setuid(getuid()) < 0)
   {
     perror("Dropping privileges failed\n");
