@@ -8,7 +8,7 @@
 #define I2C_SLAVE	0x0703	/* Change slave address			*/
 #include "HTU21D.h"
 
-int main ()
+int main (int argc, char* argv[])
 {
 	int fd = open("/dev/i2c-0", O_RDWR);
 	if ( 0 > fd )
@@ -18,7 +18,13 @@ int main ()
 	}
 	ioctl(fd, I2C_SLAVE, 0x40);
 	
+	if (argc >= 2 && !strcmp(argv[1], "--json")) {
+	  printf("{ \"H\":%.2f,\n\"T\":%.2f\n}", getHumidity(fd), getTemperature(fd));
+	}
+	else {
 	printf("H=%5.2f T=%5.2f\n", getHumidity(fd), getTemperature(fd));
+	}
+	
 	
 	return 0;
 }
