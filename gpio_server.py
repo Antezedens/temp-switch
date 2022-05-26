@@ -60,7 +60,7 @@ def get_setgpio():
 def get_dht22():
     return dht22(request.args.get('pin'))
 @app.route('/htu21d', methods=['GET'])
-def get_dht22():
+def get_htu21d():
     return htu21d()#request.args.get('pin'))
 
 if __name__ == '__main__':
