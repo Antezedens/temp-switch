@@ -16,6 +16,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/syscall.h>
+#include <string.h>
 
 #include "locking.h"
 
@@ -26,6 +27,9 @@ static const int OUTPUT = 1;
 static const int INPUT = 0;
 static const int HIGH = 1;
 static const int LOW = 0;
+static const int true = 1;
+static const int false = 0;
+typedef int bool;
 
 void delayMicroseconds(int us) {
 	struct timespec ts;
@@ -88,7 +92,7 @@ static void waitfor(int v) {
 	while (digitalRead(DHTPIN) != v);
 }
 
-static int read_dht22_dat()
+static int read_dht22_dat(bool json)
 {
   uint8_t i;
 
@@ -142,6 +146,9 @@ static int read_dht22_dat()
 				}
 
 
+    if (json) 
+	    printf("{ \"H\":%d.%d,\n\"T\":%d.%d\n}", h/10, h%10, t/10, t%10);
+    else
     printf("H=%d.%d T=%d.%d \n", h/10, h%10, t/10, t%10 );
     return 0;
   }
@@ -174,12 +181,18 @@ int main (int argc, char *argv[])
   signal(SIGALRM, stop);
 	alarm(1);
 
+  bool json = false;
   int lockfd;
+  int fileArg = 1;
+  if (argc >= 2 && !strcmp(argv[1], "--json")) {
+	  json = true;
+	  fileArg = 2;
+	 }
 
-  if (argc < 2)
-    printf ("usage: %s <pin>\n",argv[0]);
+  if (argc <= fileArg)
+    printf ("usage: %s [--json] <pin>\n",argv[0]);
   else
-    DHTPIN = atoi(argv[1]);
+    DHTPIN = atoi(argv[fileArg]);
 
  	char buf[64];
 	sprintf(buf, "/sys/class/gpio/gpio%d/direction", DHTPIN);
@@ -213,7 +226,7 @@ int main (int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  int res = read_dht22_dat();
+  int res = read_dht22_dat(json);
 
   close_lockfile(lockfd);
 
