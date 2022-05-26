@@ -32,14 +32,14 @@ def dht22(pin):
     for i in range(0,10):
         try:
             return subprocess.run(["/root/temp-switch/dht22/dht", "--json", pin], capture_output=True, check=True).stdout.decode()
-        except:
-            print("failed %d" % (i))
+        except e:
+            print("failed %d -> %s" % (i, e))
             pass
         
-def htu21d():
+def htu21d(i2c):
     for i in range(0,10):
         try:
-            return subprocess.run(["/root/temp-switch/htu21d/HTU21D", "--json", pin], capture_output=True, check=True).stdout.decode()
+            return subprocess.run(["/root/temp-switch/htu21d/HTU21D", "--json"], capture_output=True, check=True).stdout.decode()
         except:
             print("failed %d" % (i))
             pass
@@ -61,7 +61,7 @@ def get_dht22():
     return dht22(request.args.get('pin'))
 @app.route('/htu21d', methods=['GET'])
 def get_htu21d():
-    return htu21d()#request.args.get('pin'))
+    return htu21d(request.args.get('i2c'))
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",debug=False)
