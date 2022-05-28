@@ -3,7 +3,7 @@
 import os
 import subprocess
 from flask import Flask, jsonify, request
-# apt install python3-flash
+# apt install python3-flask
 
 sysfs='/sys/class/gpio/'
 
@@ -27,6 +27,10 @@ def gpioOut(pin, out = None):
             print("pin %d is now %d" % (pin, out))
             with open(val, "w") as f2:
                 f2.write(value)
+
+def irrigation(mins):
+    print("mins: %s" % mins)
+    subprocess.Popen(["/root/temp-switch/irrigation4.sh"] + mins.split(','))
                 
 def dht22(pin):
     for i in range(0,10):
@@ -62,6 +66,10 @@ def get_dht22():
 @app.route('/htu21d', methods=['GET'])
 def get_htu21d():
     return htu21d(request.args.get('i2c'))
+@app.route('/irrigation', methods=['GET'])
+def get_irrigation():
+    irrigation(request.args.get('mins'))
+    return jsonify({'ok':True})
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",debug=False)
