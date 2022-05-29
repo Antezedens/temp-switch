@@ -3,26 +3,27 @@ cd ${0%%irrigation.sh}
 
 #1 huette
 #2 pool
-#3 stiege
+#####3 stiege
 #4 flaeche
 #5 grillplatz
-#6 böschung
+#####6 böschung
 
 alla=$@
+echo "irrigation params: '$alla'"
 
 if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" != "" ] && [ "$4" != "" ] && [ "$5" != "" ] && [ "$6" != "" ] ; then
 	minutes="$1 $2 $3 $4 $5 $6"
 elif [ "${alla##force}" != "$alla" ] ; then
 	minutes="${alla##force}"
 else
-	minutes="10 10m 10m 10m 10m 10m"
+	minutes="1m 1m 1m 1m"
 fi	
 
 #for i in 5 6m 170 6m 8m 9m ; do
 for i in $minutes ; do
-	./setrelais.sh 58 1
+	./setrelais2.sh 198 0
 	echo "irrigation for $i"
 	sleep $i
-	./setrelais.sh 58 0
+	./setrelais2.sh 198 1
 	sleep 60
 done

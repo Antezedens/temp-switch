@@ -6,6 +6,8 @@ from flask import Flask, jsonify, request
 # apt install python3-flask
 
 sysfs='/sys/class/gpio/'
+irrigation=None
+irrigation_times=""
 
 def gpioOut(pin, out = None):
     direction = sysfs + 'gpio%d/direction' % pin
@@ -28,16 +30,30 @@ def gpioOut(pin, out = None):
             with open(val, "w") as f2:
                 f2.write(value)
 
-def irrigation(mins):
-    print("mins: %s" % mins)
-    subprocess.Popen(["/root/temp-switch/irrigation4.sh"] + mins.split(','))
+def poll_irrigation():
+    global irrigation_times, irrigation
+    if irrigation is None:
+        return ""
+    if irrigation.poll() is None:
+        return irrigation_times
+    irrigation = None
+    return ""
+
+def start_irrigation(times):
+    global irrigation_times, irrigation
+    poll = poll_irrigation()
+    if poll != "":
+        os.system("logger irrigation already started: " + poll)
+    else:
+        irrigation_times = times
+        irrigation = subprocess.Popen(["/root/temp-switch/irrigation.sh", "force"] + times.split(','))
                 
 def dht22(pin):
     for i in range(0,10):
         try:
             return subprocess.run(["/root/temp-switch/dht22/dht", "--json", pin], capture_output=True, check=True).stdout.decode()
-        except e:
-            print("failed %d -> %s" % (i, e))
+        except:
+            print("failed %d" % (i))
             pass
         
 def htu21d(i2c):
@@ -66,10 +82,13 @@ def get_dht22():
 @app.route('/htu21d', methods=['GET'])
 def get_htu21d():
     return htu21d(request.args.get('i2c'))
-@app.route('/irrigation', methods=['GET'])
-def get_irrigation():
-    irrigation(request.args.get('mins'))
+@app.route('/start_irrigation', methods=['GET'])
+def start_irrigation_req():
+    start_irrigation(request.args.get('times'))
     return jsonify({'ok':True})
+@app.route('/poll_irrigation', methods=['GET'])
+def poll_irrigation_req():
+    return jsonify({'times': poll_irrigation()})
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",debug=False)
