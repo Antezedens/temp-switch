@@ -9,21 +9,16 @@ cd ${0%%irrigation.sh}
 #####6 böschung
 
 alla=$@
-echo "irrigation params: '$alla'"
 
-if [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" != "" ] && [ "$4" != "" ] && [ "$5" != "" ] && [ "$6" != "" ] ; then
-	minutes="$1 $2 $3 $4 $5 $6"
-elif [ "${alla##force}" != "$alla" ] ; then
-	minutes="${alla##force}"
-else
-	minutes="1m 1m 1m 1m"
-fi	
+gpio=$1
+minutes=${alla##$1 } 
+echo "irrigation params: gpio $gpio: $minutes ('$alla')"
 
 #for i in 5 6m 170 6m 8m 9m ; do
 for i in $minutes ; do
-	./setrelais2.sh 198 0
+	./setrelais2.sh $gpio 0
 	echo "irrigation for $i"
 	sleep $i
-	./setrelais2.sh 198 1
+	./setrelais2.sh $gpio 1
 	sleep 60
 done

@@ -39,14 +39,14 @@ def poll_irrigation():
     irrigation = None
     return ""
 
-def start_irrigation(times):
+def start_irrigation(pin, times):
     global irrigation_times, irrigation
     poll = poll_irrigation()
     if poll != "":
         os.system("logger irrigation already started: " + poll)
     else:
         irrigation_times = times
-        irrigation = subprocess.Popen(["/root/temp-switch/irrigation.sh", "force"] + times.split(','))
+        irrigation = subprocess.Popen(["/root/temp-switch/irrigation.sh", "%s" % pin] + times.split(','))
                 
 def dht22(pin):
     for i in range(0,10):
@@ -84,7 +84,7 @@ def get_htu21d():
     return htu21d(request.args.get('i2c'))
 @app.route('/start_irrigation', methods=['GET'])
 def start_irrigation_req():
-    start_irrigation(request.args.get('times'))
+    start_irrigation(request.args.get('pin'), request.args.get('times'))
     return jsonify({'ok':True})
 @app.route('/poll_irrigation', methods=['GET'])
 def poll_irrigation_req():
