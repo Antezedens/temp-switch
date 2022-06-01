@@ -39,6 +39,15 @@ def poll_irrigation():
     irrigation = None
     return ""
 
+def toggle_irrigation(pin, times):
+    global irrigation_times, irrigation
+    poll = poll_irrigation()
+    if poll != "":
+        irrigation.kill()
+        irrigation = subprocess.Popen(["/root/temp-switch/irrigation.sh", "%s" % pin])
+    else:
+        start_irrigation(pin, times)
+
 def start_irrigation(pin, times):
     global irrigation_times, irrigation
     poll = poll_irrigation()
@@ -85,6 +94,10 @@ def get_htu21d():
 @app.route('/start_irrigation', methods=['GET'])
 def start_irrigation_req():
     start_irrigation(request.args.get('pin'), request.args.get('times'))
+    return jsonify({'ok':True})
+@app.route('/toggle_irrigation', methods=['GET'])
+def toggle_irrigation_req():
+    toggle_irrigation(request.args.get('pin'), request.args.get('times'))
     return jsonify({'ok':True})
 @app.route('/poll_irrigation', methods=['GET'])
 def poll_irrigation_req():

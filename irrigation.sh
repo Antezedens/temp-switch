@@ -22,3 +22,5 @@ for i in $minutes ; do
 	./setrelais2.sh $gpio 1
 	sleep 60
 done
+
+./setrelais2.sh $gpio 1
