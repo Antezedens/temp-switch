@@ -71,8 +71,18 @@ def htu21d(i2c):
             return subprocess.run(["/root/temp-switch/htu21d/HTU21D", "--json"], capture_output=True, check=True).stdout.decode()
         except:
             print("failed %d" % (i))
-            pass
-            
+
+def w1_temp(id):
+    for i in range(0,10):
+        try:
+            with open("/sys/bus/w1/devices/%s/temperature" % id) as f:
+                contents = f.readline().strip()
+                if len(contents) > 0:
+                    return { "temp": int(contents) / 1000.0}
+        except:
+            print("failed %d" % (i))
+
+
 #print(gpioOut(121))
 #gpioOut(121, 0)
 #gpioOut(122, 0)
@@ -102,6 +112,9 @@ def toggle_irrigation_req():
 @app.route('/poll_irrigation', methods=['GET'])
 def poll_irrigation_req():
     return jsonify({'times': poll_irrigation()})
+@app.route('/w1_temp', methods=['GET'])
+def w1_temp_req():
+    return jsonify(w1_temp(request.args.get('id')))
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",debug=False)
