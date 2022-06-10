@@ -1,0 +1,11 @@
+[Unit]
+Description=GPIO Polling
+
+[Service]
+ExecStart=/root/temp-switch/poll.py
+WorkingDirectory=/root/temp-switch/
+Restart=on-failure
+RestartSec=60s
+
+[Install]
+WantedBy=multi-user.target
