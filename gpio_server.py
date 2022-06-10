@@ -94,12 +94,12 @@ def handleGpio(pin, out = None):
 def poll_irrigation(pin):
     global irrigation
     if pin not in irrigation:
-        print("key not in dict")
+        #print("key not in dict")
         return ""
     if irrigation[pin].is_alive():
-        print("alive")
+        #print("alive")
         return irrigation[pin].finished
-    print("thread dead")
+    #print("thread dead")
     irrigation.pop(pin)
     return ""
 
@@ -129,15 +129,16 @@ def dht22(pin):
         try:
             return subprocess.run(["/root/temp-switch/dht22/dht", "--json", pin], capture_output=True, check=True).stdout.decode()
         except:
-            print("failed %d" % (i))
             pass
-        
+    print("dht22 failed too often")
+
 def htu21d(i2c):
     for i in range(0,10):
         try:
             return subprocess.run(["/root/temp-switch/htu21d/HTU21D", "--json"], capture_output=True, check=True).stdout.decode()
         except:
-            print("failed %d" % (i))
+            pass
+    print("htu21d failed too often")
 
 def w1_temp(id):
     for i in range(0,10):
@@ -147,7 +148,8 @@ def w1_temp(id):
                 if len(contents) > 0:
                     return { "temp": int(contents) / 1000.0}
         except:
-            print("failed %d" % (i))
+            pass
+    print("w1_temp failed too often")
 
 
 #print(handleGpio(121))
@@ -193,7 +195,7 @@ if __name__ == '__main__':
                 pinint = int(os.path.basename(pin).split('.')[0])
                 handleGpio(pinint, 1) # initially turn off
             except:
-                print("did not work to disable %s" % pin)
+                print("could not disable %s" % pin)
 
     app.run(host="0.0.0.0",debug=False)
     #print(dht22("12"))
