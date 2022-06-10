@@ -5,7 +5,7 @@ from datetime import timedelta, datetime
 from gpiod import chip, line_request, line_event
 import requests
 import time
-
+import subprocess
 
 CHIP = 0
 LINE_OFFSET = 6
@@ -43,7 +43,7 @@ while True:
         event = button.event_read()
         if event.event_type == line_event.FALLING_EDGE:
             if abs((event.timestamp - lastevent).total_seconds()) > 0.02:
-                print("button pressed")
+                subprocess.run(["logger", "button pressed"])
                 lastevent = event.timestamp
                 #requests.get('http://localhost:5000/toggle_irrigation?pin=19,198&times=15s')
                 requests.get('http://localhost:5000/toggle_irrigation?pin=198&times=70s')
