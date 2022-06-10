@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 from datetime import timedelta, datetime
 from gpiod import chip, line_request, line_event
@@ -32,7 +34,7 @@ button.request(config)
 #    led.set_value(1)
 #    time.sleep(0.3)
 
-requests.get('http://localhost:5000/toggle_irrigation?pin=198&times=60m')
+#requests.get('http://localhost:5000/toggle_irrigation?pin=198,199&times=60m')
 
 lastevent = datetime.utcfromtimestamp(0)
 while True:
@@ -43,6 +45,7 @@ while True:
             if abs((event.timestamp - lastevent).total_seconds()) > 0.02:
                 print("falling: ", event.timestamp)
                 lastevent = event.timestamp
-                requests.get('http://localhost:5000/toggle_irrigation?pin=198&times=60m')
+                #requests.get('http://localhost:5000/toggle_irrigation?pin=19,198&times=15s')
+                requests.get('http://localhost:5000/toggle_irrigation?pin=198&times=70s')
             else:
                 print("ignore bounce event")

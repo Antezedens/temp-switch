@@ -10,8 +10,8 @@ from pytimeparse.timeparse import timeparse
 from datetime import datetime, timedelta
 # apt install python3-flask
 
-def run_irrigation(pin, times, evt):
-    print("running timeout on %d - times: %s" % (pin, times))
+def run_irrigation(pins, times, evt):
+    print("running timeout on %s - times: %s" % (pins, times))
     first = True
     for i in times:
         if first:
@@ -19,11 +19,13 @@ def run_irrigation(pin, times, evt):
         else:
             if evt.wait(60):
                 return
-        print("%d -> on, wait %ds" % (pin, i))
-        handleGpio(pin, 0)
+        print("%s -> on, wait %ds" % (pins, i))
+        for pin in pins:
+            handleGpio(pin, 0)
         stop = evt.wait(i)
-        handleGpio(pin, 1)
-        print("%d -> off" % pin)
+        for pin in pins:
+            handleGpio(pin, 1)
+        print("%s -> off" % pins)
         if stop:
             return
 
@@ -32,10 +34,10 @@ def time_string_to_sec(time):
     return timeparse(time)
 
 class Irrigation:
-    def __init__(self, pin, times):
+    def __init__(self, pins, times):
         self.evt = threading.Event()
         self.times = list(map(time_string_to_sec, times.split(',')))
-        self.thread = threading.Thread(target=run_irrigation, args=(pin, self.times, self.evt))
+        self.thread = threading.Thread(target=run_irrigation, args=(pins, self.times, self.evt))
         self.thread.start()
         finished = datetime.now()
         first = True
@@ -101,23 +103,26 @@ def poll_irrigation(pin):
     irrigation.pop(pin)
     return ""
 
-def toggle_irrigation(pin, times):
+def toggle_irrigation(pins, times):
     global irrigation
+    pin = int(pins.split(',')[0])
     poll = poll_irrigation(pin)
     if poll != "":
         irrigation[pin].stop()
         return "stopped"
     else:
-        start_irrigation(pin, times)
+        start_irrigation(pins, times)
         return "started"
 
-def start_irrigation(pin, times):
+def start_irrigation(pins, times):
     global irrigation
+    pinlist = list(map(int, pins.split(',')))
+    pin = pinlist[0]
     poll = poll_irrigation(pin)
     if poll != "":
         os.system("logger irrigation already started: " + pin + " : " + poll)
     else:
-        irrigation[pin] = Irrigation(pin, times)
+        irrigation[pin] = Irrigation(pinlist, times)
                 
 def dht22(pin):
     for i in range(0,10):
@@ -165,11 +170,11 @@ def get_htu21d():
     return htu21d(request.args.get('i2c'))
 @app.route('/start_irrigation', methods=['GET'])
 def start_irrigation_req():
-    start_irrigation(int(request.args.get('pin')), request.args.get('times'))
+    start_irrigation(request.args.get('pin'), request.args.get('times'))
     return jsonify({'ok':True})
 @app.route('/toggle_irrigation', methods=['GET'])
 def toggle_irrigation_req():
-    return jsonify({'action':toggle_irrigation(int(request.args.get('pin')), request.args.get('times'))})
+    return jsonify({'action':toggle_irrigation(request.args.get('pin'), request.args.get('times'))})
 @app.route('/poll_irrigation', methods=['GET'])
 def poll_irrigation_req():
     return jsonify({'times': poll_irrigation(int(request.args.get('pin')))})
