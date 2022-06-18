@@ -40,7 +40,7 @@ while True:
     if button.event_wait(timedelta(seconds=600)):
         # event_read() is blocking function.
         event = button.event_read()
-        if event.get_value() == 0:
+        if button.get_value() == 0:
             if button.event_wait(timedelta(milliseconds=400)):
                 subprocess.run(["logger", "button pressed not long enough"])
             else:
