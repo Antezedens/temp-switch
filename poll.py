@@ -8,9 +8,9 @@ import time
 import subprocess
 
 CHIP = 0
-LINE_OFFSET = 6
+LINE_OFFSET = 1 # 6
 #LED_LINE_OFFSET = 198
-EDGE = line_request.EVENT_FALLING_EDGE
+EDGE = line_request.EVENT_BOTH_EDGES
 
 c = chip(CHIP)
 button = c.get_line(LINE_OFFSET)
@@ -36,16 +36,16 @@ button.request(config)
 
 #requests.get('http://localhost:5000/toggle_irrigation?pin=198,199&times=60m')
 
-lastevent = datetime.utcfromtimestamp(0)
 while True:
     if button.event_wait(timedelta(seconds=600)):
         # event_read() is blocking function.
         event = button.event_read()
-        if event.event_type == line_event.FALLING_EDGE:
-            if abs((event.timestamp - lastevent).total_seconds()) > 0.02:
-                subprocess.run(["logger", "button pressed"])
-                lastevent = event.timestamp
+        if event.get_value() == 0:
+            if button.event_wait(timedelta(milliseconds=400)):
+                subprocess.run(["logger", "button pressed not long enough"])
+            else:
+                subprocess.run(["logger", "button pressed for 0.4s"])
                 #requests.get('http://localhost:5000/toggle_irrigation?pin=19,198&times=15s')
                 requests.get('http://localhost:5000/toggle_irrigation?pin=198&times=70s')
-            else:
-                print("ignore bounce event")
+        else:
+            subprocess.run(["logger", "button pressed: rising edge"])
