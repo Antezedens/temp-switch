@@ -46,6 +46,7 @@ while True:
             else:
                 subprocess.run(["logger", "button pressed for 0.4s"])
                 #requests.get('http://localhost:5000/toggle_irrigation?pin=19,198&times=15s')
-                requests.get('http://localhost:5000/toggle_irrigation?pin=198&times=70s')
+                requests.post('http://10.5.5.20:8080/rest/items/toggle_watersupply_pool', data="ON", headers={'Content-Type': 'text/plain'})
+                #requests.get('http://localhost:5000/toggle_irrigation?pin=198&times=70s')
         else:
             subprocess.run(["logger", "button pressed: rising edge"])
