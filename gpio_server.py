@@ -8,6 +8,7 @@ import glob
 from flask import Flask, jsonify, request
 from pytimeparse.timeparse import timeparse
 from datetime import datetime, timedelta
+from gpiod import chip, line_request
 # apt install python3-flask
 
 def run_irrigation(pins, times, evt):
@@ -21,10 +22,10 @@ def run_irrigation(pins, times, evt):
                 return
         print("%s -> on, wait %ds" % (pins, i))
         for pin in pins:
-            handleGpio(pin, 0)
+            handleGpioOut(pin, 0)
         stop = evt.wait(i)
         for pin in pins:
-            handleGpio(pin, 1)
+            handleGpioOut(pin, 1)
         print("%s -> off" % pins)
         if stop:
             return
@@ -58,38 +59,50 @@ class Irrigation:
         self.thread.join()
 
 irrigation = {}
+gpios = {}
 
-def handleGpio(pin, out = None):
-    global gpioserver_dir, sysfs
-    forcedOut = False
-    direction = sysfs + 'gpio%d/direction' % pin
-    val = sysfs + 'gpio%d/value' % pin
-    if not (os.path.isfile(direction)):
-        with open(sysfs + "export",'w',encoding = 'utf-8') as f:
-            f.write("%d" % pin)
-            print("exported %d" % pin)
-    with open(direction) as f:
-        if (f.read() != 'out\n'):
-            print("configure %d as out" % pin)
-            with open(direction, "w") as f2:
-                f2.write('out')
-                forcedOut = True
-                out = 1
-    with open(val) as f:
-        if out is None:
-            return int(f.read())
-        value = "%d\n" % out
-        tempfile = gpioserver_dir + '%d.pin' % pin
-        if not os.path.exists(tempfile):
-            with open(tempfile, "w") as _:
-                pass
+def handleGpioOut(key, out = None):
+    global gpioserver_dir, gpios
+    chip_line = key.split('-')
+    if len(chip_line) == 1:
+        gpio_chip = 0
+        gpio_line = int(chip_line[0])
+    else:
+        gpio_chip = int(chip_line[0])
+        gpio_line = int(chip_line[1])
 
-        if (f.read() != value):
-            print("pin %d is now %d" % (pin, out))
-            with open(val, "w") as f2:
-                f2.write(value)
-                if forcedOut:
-                    return out
+    if key not in gpios:
+        c = chip(gpio_chip)
+        gpios[key] = c.get_line(gpio_line)
+        config = line_request()
+        config.consumer = "gpioserver"
+        config.request_type = line_request.DIRECTION_OUTPUT
+        gpios[key].request(config)
+        print("requested %s" % key)
+
+    tempfile = gpioserver_dir + ('%s.pin' % key)
+    if not os.path.exists(tempfile):
+        with open(tempfile, "w") as _:
+            pass
+    gpios[key].set_value(out)
+    print("pin %s is now %d" % (key, out))
+
+def handleGpioIn(key):
+    global gpioserver_dir, gpios
+    chip_line = key.split('-')
+    gpio_chip = int(chip_line[0])
+    gpio_line = int(chip_line[1])
+
+    if key not in gpios:
+        c = chip(gpio_chip)
+        gpios[key] = c.get_line(gpio_line)
+        config = line_request()
+        config.consumer = "gpioserver"
+        config.request_type = line_request.DIRECTION_OUTPUT
+        gpios[key].request(config)
+        print("requested %s" % key)
+
+    return gpios[key].get_value()
 
 def poll_irrigation(pin):
     global irrigation
@@ -105,7 +118,7 @@ def poll_irrigation(pin):
 
 def toggle_irrigation(pins, times):
     global irrigation
-    pin = int(pins.split(',')[0])
+    pin = pins.split(',')[0]
     poll = poll_irrigation(pin)
     if poll != "":
         irrigation[pin].stop()
@@ -116,7 +129,7 @@ def toggle_irrigation(pins, times):
 
 def start_irrigation(pins, times):
     global irrigation
-    pinlist = list(map(int, pins.split(',')))
+    pinlist = pins.split(',')
     pin = pinlist[0]
     poll = poll_irrigation(pin)
     if poll != "":
@@ -157,13 +170,22 @@ def w1_temp(id):
 #handleGpio(122, 0)
 app = Flask(__name__)
 
+
 @app.route('/gpio', methods=['GET'])
 def get_gpio():
-    return jsonify({'gpio':handleGpio(int(request.args.get('pin')))})
+    return jsonify(
+        {
+            'gpio': handleGpioIn(request.args.get('pin'))
+        }
+    )
+
+
 @app.route('/setgpio', methods=['GET'])
 def get_setgpio():
-    handleGpio(int(request.args.get('pin')), int(request.args.get('value')))
-    return jsonify({'gpio_set':'ok'})
+    handleGpioOut(request.args.get('pin'), int(request.args.get('value')))
+    return jsonify({'gpio_set': 'ok'})
+
+
 @app.route('/dht22', methods=['GET'])
 def get_dht22():
     return dht22(request.args.get('pin'))
@@ -179,7 +201,7 @@ def toggle_irrigation_req():
     return jsonify({'action':toggle_irrigation(request.args.get('pin'), request.args.get('times'))})
 @app.route('/poll_irrigation', methods=['GET'])
 def poll_irrigation_req():
-    return jsonify({'times': poll_irrigation(int(request.args.get('pin')))})
+    return jsonify({'times': poll_irrigation(request.args.get('pin'))})
 @app.route('/w1_temp', methods=['GET'])
 def w1_temp_req():
     return jsonify(w1_temp(request.args.get('id')))
@@ -192,8 +214,8 @@ if __name__ == '__main__':
     except: # already exists
         for pin in glob.glob(gpioserver_dir + '*.pin'):
             try:
-                pinint = int(os.path.basename(pin).split('.')[0])
-                handleGpio(pinint, 1) # initially turn off
+                chip_pin = os.path.basename(pin).split('.')
+                handleGpioOut(chip_pin[0], 1) # initially turn off
             except:
                 print("could not disable %s" % pin)
 
