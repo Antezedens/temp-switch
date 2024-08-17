@@ -2,7 +2,7 @@
 Description=GPIO server
 
 [Service]
-ExecStart=/root/temp-switch/gpio_server.py
+ExecStart=/root/.env/bin/python3 gpio_server.py
 WorkingDirectory=/root/temp-switch/
 Restart=on-failure
 RestartSec=60s

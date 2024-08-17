@@ -8,7 +8,8 @@ import glob
 from flask import Flask, jsonify, request
 from pytimeparse.timeparse import timeparse
 from datetime import datetime, timedelta
-from gpiod import chip, line_request
+from gpiod.line import Direction, Value
+import gpiod
 # apt install python3-flask
 
 def run_irrigation(pins, times, evt):
@@ -61,7 +62,18 @@ class Irrigation:
 irrigation = {}
 gpios = {}
 
-def handleGpioOut(key, out = None):
+class MyLine:
+    def __init__(self, line, req):
+        self.line = line
+        self.req = req
+
+    def set_value(self, value):
+        self.req.set_value(self.line, Value.ACTIVE if value else Value.INACTIVE)
+
+    def get_value(self):
+        return self.req.get_value(self.line) == Value.ACTIVE
+
+def get_or_create(key, out = False):
     global gpioserver_dir, gpios
     chip_line = key.split('-')
     if len(chip_line) == 1:
@@ -72,37 +84,35 @@ def handleGpioOut(key, out = None):
         gpio_line = int(chip_line[1])
 
     if key not in gpios:
-        c = chip(gpio_chip)
-        gpios[key] = c.get_line(gpio_line)
-        config = line_request()
-        config.consumer = "gpioserver"
-        config.request_type = line_request.DIRECTION_OUTPUT
-        gpios[key].request(config)
+        req = MyLine(gpio_line, gpiod.request_lines(
+            "/dev/gpiochip%d" % gpio_chip,
+            consumer="gpioserver",
+            config = {
+                gpio_line: gpiod.LineSettings(
+                    direction=Direction.OUTPUT,
+                    output_value=Value.ACTIVE if out else Value.INACTIVE
+                )
+            },
+        ))
+        gpios[key] = req
         print("requested %s" % key)
+        return req
+    else:
+        return gpios[key]
+
+def handleGpioOut(key, out):
+    global gpioserver_dir
+    req = get_or_create(key, out)
 
     tempfile = gpioserver_dir + ('%s.pin' % key)
     if not os.path.exists(tempfile):
         with open(tempfile, "w") as _:
             pass
-    gpios[key].set_value(out)
+    req.set_value(out)
     print("pin %s is now %d" % (key, out))
 
 def handleGpioIn(key):
-    global gpioserver_dir, gpios
-    chip_line = key.split('-')
-    gpio_chip = int(chip_line[0])
-    gpio_line = int(chip_line[1])
-
-    if key not in gpios:
-        c = chip(gpio_chip)
-        gpios[key] = c.get_line(gpio_line)
-        config = line_request()
-        config.consumer = "gpioserver"
-        config.request_type = line_request.DIRECTION_OUTPUT
-        gpios[key].request(config)
-        print("requested %s" % key)
-
-    return gpios[key].get_value()
+    return get_or_create(key).get_value()
 
 def poll_irrigation(pin):
     global irrigation
