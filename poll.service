@@ -2,7 +2,7 @@
 Description=GPIO Polling
 
 [Service]
-ExecStart=/root/temp-switch/poll.py
+ExecStart=/root/.env/bin/python3 poll.py
 WorkingDirectory=/root/temp-switch/
 Restart=on-failure
 RestartSec=60s
