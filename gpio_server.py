@@ -71,7 +71,7 @@ class MyLine:
         self.req.set_value(self.line, Value.ACTIVE if value else Value.INACTIVE)
 
     def get_value(self):
-        return self.req.get_value(self.line) == Value.ACTIVE
+        return 1 if (self.req.get_value(self.line) == Value.ACTIVE) else 0
 
 def get_or_create(key, out = False):
     global gpioserver_dir, gpios
