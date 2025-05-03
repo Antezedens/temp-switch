@@ -104,12 +104,14 @@ def handleGpioOut(key, out):
     global gpioserver_dir
     req = get_or_create(key, out)
 
+    # tmp/gpioservier
     tempfile = gpioserver_dir + ('%s.pin' % key)
     if not os.path.exists(tempfile):
-        with open(tempfile, "w") as _:
+        with open(tempfile, "w") as pinf:
+            #pinf.write(str(out))
             pass
     req.set_value(out)
-    print("pin %s is now %d" % (key, out))
+    print("pin %s is now %d (file: %s)" % (key, out, tempfile))
 
 def handleGpioIn(key):
     return get_or_create(key).get_value()
@@ -218,14 +220,19 @@ def w1_temp_req():
 
 if __name__ == '__main__':
     sysfs ='/sys/class/gpio/'
-    gpioserver_dir='/tmp/gpioserver/'
+    gpioserver_dir='/root/gpio-states/'
     try:
         os.mkdir(gpioserver_dir)
     except: # already exists
         for pin in glob.glob(gpioserver_dir + '*.pin'):
             try:
-                chip_pin = os.path.basename(pin).split('.')
-                handleGpioOut(chip_pin[0], 1) # initially turn off
+                with open(pin) as pinf:
+                    chip_pin = os.path.basename(pin).split('.')
+                    #state = int(pinf.readline())
+                    state = 1
+                    # restore last state:
+                    handleGpioOut(chip_pin[0], state)
+                    print("restoring state of %s to %d" % (pin, state))
             except:
                 print("could not disable %s" % pin)
 
