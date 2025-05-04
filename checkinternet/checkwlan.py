@@ -14,8 +14,11 @@ for i in range(100):
         time.sleep(10 - elapsed)
     if (i % 10) == 9:
         subprocess.run(["logger", "reconnecting wlan"])
-        subprocess.run(["ifconfig", "wlx40a5efd39dc7", "down"])
-        subprocess.run(["ifconfig", "wlx40a5efd39dc7", "up"])
-
+        # tp-link usb dongle
+        subprocess.run(["ifconfig", "wlx30de4bb0e5fd", "down"])
+        subprocess.run(["ifconfig", "wlx30de4bb0e5fd", "up"])
+        # noname wlan device with two antennas
+        #subprocess.run(["ifconfig", "wlx40a5efd39dc7", "down"])
+        #subprocess.run(["ifconfig", "wlx40a5efd39dc7", "up"])
 subprocess.run(["logger", "wlan down rebooting"])
 subprocess.run(["reboot"])
